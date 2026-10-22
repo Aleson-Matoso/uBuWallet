@@ -33,7 +33,7 @@ img{pointer-events:none}
 <style>
 /* Tokens extraídos do Figma [POC] uBu Wallet */
 :root{
-  --primary:#282e62; --primary-dark:#181d3d; --primary-mid:#3f4797;
+  --primary:#282e62; --primary-dark:#181d3d; --primary-mid:#3b438e; --event:#5d69e1;
   --bg:#ededed; --surface:#fefefe; --text:#0f0f0f; --muted:#5b5d6b;
   --line:#dcdce2; --danger:#6b1414; --success:#225a1e; --camera:#141414;
   --r:8px;
@@ -145,12 +145,12 @@ body.web .sheet{max-width:640px;margin:0 auto}
 .dots{display:flex;justify-content:center;gap:4px;margin-top:14px}
 .dots button{width:8px;height:8px;border-radius:4px;background:#b3b5cc;transition:width .2s,background .2s;padding:0}
 .dots button.on{width:24px;background:var(--primary-mid)}
-.qr-card{background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.qr-card .in{padding:20px;display:flex;align-items:center;justify-content:center}
-.qr-card .qr{width:min(100%,218px);height:auto;display:block;image-rendering:pixelated}
-.cred-head.ev{background:linear-gradient(90deg,#3f4797,#5663d9)}
+.qr-card{background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.12);height:var(--ch,auto);display:flex;flex-direction:column}
+.qr-card .in{flex:1;min-height:0;padding:16px;display:flex;align-items:center;justify-content:center}
+.qr-card .qr{display:block;width:min(100%,calc(var(--ch,300px) - 72px));height:auto;aspect-ratio:218/224;object-fit:contain;image-rendering:pixelated}
+.cred-head.ev{background:linear-gradient(90deg,#3b438e,#5d69e1)}
 .cred-head .cred-ico,.ico-circle.ev .cred-ico{width:22px;height:22px;object-fit:contain}
-.ico-circle.ev{background:#5663d9}
+.ico-circle.ev{background:var(--event)}
 .or{display:flex;align-items:center;gap:12px;margin:20px 0 16px;font-size:14px}
 .or::before,.or::after{content:"";flex:1;border-top:1px solid #6b6d7a}
 body.phone .tabbar{height:80px;padding-bottom:16px}
@@ -215,7 +215,7 @@ p{font-size:14px;line-height:24px}
 .opt .txt{flex:1}
 .opt b{display:block;font-size:14px}
 .opt small{display:block;font-size:12px;line-height:16px;color:var(--muted)}
-.ico-circle{width:40px;height:40px;border-radius:50%;background:#ececf4;display:flex;align-items:center;justify-content:center;flex:none;color:var(--primary)}
+.ico-circle{width:40px;height:40px;border-radius:50%;background:#f1f1f6;display:flex;align-items:center;justify-content:center;flex:none;color:var(--primary)}
 .ico-circle svg{width:22px;height:22px}
 .chev{width:24px;height:24px;flex:none}
 
@@ -276,7 +276,8 @@ p{font-size:14px;line-height:24px}
 .mrz{font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:14px;word-break:break-all;color:#222}
 
 /* Carteira */
-.wallet-card{display:flex;align-items:center;gap:16px;width:100%;background:var(--surface);border-left:6px solid var(--primary);padding:16px;border-radius:4px;margin-bottom:16px}
+.wallet-card{display:flex;align-items:center;gap:16px;width:100%;background:var(--surface);border-left:10px solid var(--primary-mid);padding:16px;border-radius:4px;margin-bottom:16px}
+.wallet-card.ev{border-left-color:var(--event)}
 .wallet-card .txt{flex:1}
 .wallet-card small{display:block;font-size:12px;color:#333}
 .wallet-card strong{display:block;font-size:14px;margin:4px 0}
@@ -908,7 +909,14 @@ p{font-size:14px;line-height:24px}
     var card=kind==='evento'?credEvento():kind==='dados'?credDados():credPassaporte();
     return '<div class="pager"><div class="pages" id="cred-pages"><div class="pg">'+card+'</div><div class="pg">'+credQr(kind)+'</div></div>'+
       '<div class="dots" id="cred-dots"><button class="on" data-page="0" aria-label="Dados da credencial"></button><button data-page="1" aria-label="QR code da credencial"></button></div></div>'}
-  function fitPager(){var p=$('#cred-pages');if(!p)return;var i=Math.round(p.scrollLeft/(p.clientWidth+12)),pg=p.children[i];if(pg)p.style.height=pg.offsetHeight+'px'}
+  function fitPager(){
+    var p=$('#cred-pages');if(!p)return;
+    var card=p.children[0]&&p.children[0].firstElementChild;if(!card)return;
+    var h=card.offsetHeight;if(!h)return;
+    p.style.setProperty('--ch',h+'px');p.style.height=h+'px';
+    if(window.ResizeObserver&&fitPager.card!==card){if(!fitPager.ro)fitPager.ro=new ResizeObserver(function(){requestAnimationFrame(fitPager)});fitPager.ro.disconnect();fitPager.ro.observe(card);fitPager.card=card}
+  }
+  window.addEventListener('resize',function(){fitPager()});
   function showQr(){var p=$('#cred-pages');if(p)p.scrollTo({left:p.clientWidth+12})}
   var view='passaporte';
 
@@ -936,7 +944,7 @@ p{font-size:14px;line-height:24px}
   function walletCard(k,t,i){
     var exp=k==='passaporte'?passData().expires:k==='evento'?evData().expires:ddData().expires;
     var ic=i==='event'?'<span class="ico-circle ev"><img class="cred-ico" src="assets/logo-icon.png" alt=""></span>':'<span class="ico-circle">'+ICON(i)+'</span>';
-    return '<button class="wallet-card" data-go="cred" data-view="'+k+'">'+ic+'<span class="txt"><small>'+t+'</small><strong>'+esc(shortName(U().name))+'</strong><small><span>Validade:</span> '+esc(exp)+'</small></span><svg class="chev"><use href="#i-chev"/></svg></button>'}
+    return '<button class="wallet-card'+(k==='evento'?' ev':'')+'" data-go="cred" data-view="'+k+'">'+ic+'<span class="txt"><small>'+t+'</small><strong>'+esc(shortName(U().name))+'</strong><small><span>Validade:</span> '+esc(exp)+'</small></span><svg class="chev"><use href="#i-chev"/></svg></button>'}
 
   /* Abas inferiores */
   function renderTabs(){
@@ -1181,7 +1189,6 @@ p{font-size:14px;line-height:24px}
       var p=e.target;if(!p||p.id!=='cred-pages')return;
       var i=Math.round(p.scrollLeft/(p.clientWidth+12));
       $$('#cred-dots button').forEach(function(b,k){b.classList.toggle('on',k===i)});
-      fitPager();
     },true);
     var drag=null;
     document.addEventListener('pointerdown',function(e){
