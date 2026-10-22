@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>uBu Wallet - Protótipo</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="referrer" content="no-referrer">
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self' blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<style>
+/* Proteção: sem seleção, sem arrastar, sem impressão */
+*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+img,svg{-webkit-user-drag:none}
+img{pointer-events:none}
+@media print{html,body{display:none!important}}
+#shield{position:fixed;inset:0;z-index:2147483646;background:#15161a;color:#e8e8ee;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;padding:24px;font:600 15px 'Open Sans',system-ui,sans-serif}
+#shield small{font-weight:400;color:#9a9ba8}
+#shield.on{display:flex}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Tokens extraídos do Figma [POC] uBu Wallet */
+:root{
+  --primary:#282e62; --primary-dark:#181d3d; --primary-mid:#3f4797;
+  --bg:#ededed; --surface:#fefefe; --text:#0f0f0f; --muted:#5b5d6b;
+  --line:#dcdce2; --danger:#6b1414; --success:#225a1e; --camera:#141414;
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Open Sans',system-ui,sans-serif;color:var(--text);background:#1e1f24;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+
+/* Barra de ferramentas do protótipo */
+.toolbar{flex:none;height:52px;display:flex;align-items:center;gap:12px;padding:0 16px;background:#15161a;color:#e8e8ee;border-bottom:1px solid #2c2d34;position:relative;z-index:50}
+.toolbar .tt{font-weight:700;font-size:14px;margin-right:auto;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.toolbar .tt span{font-weight:400;color:#8b8c99}
+.tb{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:8px;border:1px solid #3a3b44;background:#22232a;color:#e8e8ee;font-size:13px;font-weight:600;white-space:nowrap}
+.tb:hover{background:#2c2d36}
+.tb svg{width:18px;height:18px;flex:none}
+.seg{display:inline-flex;border:1px solid #3a3b44;border-radius:8px;overflow:hidden}
+.seg button{height:32px;padding:0 12px;font-size:13px;font-weight:600;color:#aab;background:#22232a;display:flex;align-items:center;gap:6px}
+.seg button svg{width:18px;height:18px}
+.seg button.on{background:#4d54a8;color:#fff}
+.menu-wrap{position:relative}
+.flows{position:absolute;right:0;top:42px;width:290px;background:#22232a;border:1px solid #3a3b44;border-radius:10px;padding:6px;display:none;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.flows.open{display:block}
+.flows button{display:block;width:100%;padding:10px 12px;border-radius:6px;color:#e8e8ee;font-size:13px;font-weight:600}
+.flows button small{display:block;color:#9a9ba8;font-size:11px;font-weight:400;margin-top:2px}
+.flows button:hover{background:#2f303a}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.sitefoot{flex:none;height:36px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8b8c99;background:#15161a;border-top:1px solid #2c2d34;padding:0 16px;text-align:center}
+
+/* Moldura de iPhone */
+.device{position:relative;flex:none;width:388px;height:808px;padding:14px;background:#0b0b0d;border-radius:58px;box-shadow:0 0 0 2px #3a3b42,0 0 0 5px #0b0b0d,0 30px 80px rgba(0,0,0,.6)}
+.app{position:relative;width:360px;height:780px;background:var(--bg);overflow:hidden;border-radius:44px;--sb:44px}
+.notch{position:absolute;top:24px;left:50%;width:104px;height:30px;margin-left:-52px;border-radius:15px;background:#000;z-index:8}
+.homebar{position:absolute;bottom:20px;left:50%;width:124px;height:5px;margin-left:-62px;border-radius:3px;background:#111;z-index:8;opacity:.85}
+.sb{position:absolute;top:14px;left:14px;width:360px;height:44px;z-index:7;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 6px 34px;font-size:14px;font-weight:700;border-radius:44px 44px 0 0;pointer-events:none}
+.sb.light{background:var(--surface);color:#111}
+.sb.dark{background:var(--primary);color:#fff}
+.sb svg{width:18px;height:12px;fill:currentColor}
+.sb .r{display:flex;gap:5px;align-items:center}
+
+/* Visualização web responsiva */
+body.web .device{width:100%;height:100%;padding:0;background:none;border-radius:0;box-shadow:none;transform:none!important}
+body.web .app{width:100%;height:100%;border-radius:0;--sb:0px}
+body.web .notch,body.web .homebar,body.web .sb{display:none}
+body.web .stage{align-items:stretch}
+body.web .bar,body.web .body,body.web .foot{padding-left:max(16px,calc((100% - 640px)/2));padding-right:max(16px,calc((100% - 640px)/2))}
+body.web .brand.sm{padding-left:max(16px,calc((100% - 640px)/2))}
+body.web .tabbar{padding:0 max(0px,calc((100% - 640px)/2))}
+body.web .sheet{max-width:640px;margin:0 auto}
+
+/* Onboarding: barra sobre o azul, campos com placeholder, cadastro e login social */
+.brand.tall{height:190px;flex-direction:column;justify-content:flex-start;align-items:center}
+.brand.tall img{width:78px;margin-top:0}
+.brand.compact{height:132px}
+.brand.compact img{width:58px}
+.obar{height:56px;align-self:stretch;display:flex;align-items:center;gap:16px;padding:0 16px;color:#fff;font-size:16px;flex:none;width:100%}
+.obar .back{display:flex;width:24px;height:24px;color:#fff}
+.field label{display:none}
+.field.has label,.field:focus-within label{display:block}
+.field input::placeholder{color:#5b5d6b}
+.field:focus-within input::placeholder{color:transparent}
+.field.bad{border-color:#b3261e}
+.err{display:none;color:#b3261e;font-size:12px;line-height:16px;margin:4px 4px 0}
+.err.on{display:block}
+.check{display:flex;align-items:flex-start;gap:12px;margin:20px 0 4px;font-size:14px;line-height:22px;text-align:left;width:100%}
+.check i{flex:none;width:22px;height:22px;border:2px solid var(--primary-dark);border-radius:5px;background:var(--surface);display:flex;align-items:center;justify-content:center;margin-top:1px}
+.check i svg{width:16px;height:16px;color:#fff;display:none}
+.check.on i{background:var(--primary-dark)}
+.check.on i svg{display:block}
+.id-badge{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.18);margin-bottom:12px}
+.id-badge.apple{background:#000;color:#fff}
+.id-badge svg{width:30px;height:30px}
+.acct{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.acct:last-child{border-bottom:0}
+.avatar{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px}
+.acct .t{flex:1;min-width:0}
+.acct b{display:block;font-size:14px;line-height:20px}
+.acct small{display:block;font-size:12px;line-height:16px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.radio{width:22px;height:22px;border:2px solid #747775;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center}
+.sel .radio{border-color:var(--primary-dark)}
+.sel .radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary-dark)}
+.sel{background:#f3f3fb}
+.group{background:var(--surface);border-radius:var(--r);overflow:hidden;margin-top:16px}
+.group-h{padding:12px 16px 4px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.perm{display:flex;gap:12px;align-items:center;padding:8px 16px;font-size:14px}
+.perm svg{width:22px;height:22px;color:var(--primary);flex:none}
+.note{font-size:12px;line-height:18px;color:var(--muted);margin-top:16px}
+
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 12px}
+.two>*{min-width:0}
+#mp-num input:not(:placeholder-shown){text-transform:uppercase}
+.field select{flex:1;border:0;outline:0;font:inherit;font-size:16px;background:none;min-width:0;appearance:none;-webkit-appearance:none;color:var(--text);height:100%}
+.field.sel-f::after{content:"";position:absolute;right:16px;top:50%;width:8px;height:8px;margin-top:-6px;border-right:2px solid var(--primary-dark);border-bottom:2px solid var(--primary-dark);transform:rotate(45deg);pointer-events:none}
+.field select:invalid{color:#5b5d6b}
+.lead{margin-bottom:4px}
+.btn.fill{font-size:14.5px;padding:14px 12px;white-space:nowrap}
+.cred .photo.initials{display:flex;align-items:center;justify-content:center;background:var(--primary);color:#fff;font:700 38px/1 'Open Sans',sans-serif}
+.srows{display:flex;flex-direction:column}
+.srow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:20px}
+.srow:last-child{border-bottom:0}
+.srow .l{font-weight:700}
+.srow .v{text-align:right;color:#222;word-break:break-word}
+.srow.na .l,.srow.na .v{color:#8a8c99;font-weight:400}
+.srow.na .v{font-style:italic}
+.or{display:flex;align-items:center;gap:12px;margin:20px 0 16px;font-size:14px}
+.or::before,.or::after{content:"";flex:1;border-top:1px solid #6b6d7a}
+body.phone .tabbar{height:80px;padding-bottom:16px}
+body.phone .foot{padding-bottom:30px}
+@media(max-width:600px){.seg.view,.tb span,.toolbar .tt span{display:none}.toolbar{padding:0 10px;gap:8px}}
+
+.screen{position:absolute;inset:var(--sb,0px) 0 0 0;display:none;flex-direction:column;background:var(--bg)}
+.screen.active{display:flex}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:inherit}
+
+/* Cabeçalho e rodapé */
+.bar{height:56px;flex:none;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 16px;font-size:16px}
+.bar .back{display:flex;width:24px;height:24px}
+.bar.center{justify-content:center}
+.body{flex:1;overflow-y:auto;padding:16px}
+.body.flush{padding:0}
+.foot{flex:none;background:var(--surface);border-top:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:16px}
+
+/* Tipografia */
+h1{font-size:18px;line-height:24px;font-weight:700}
+h2{font-size:20px;line-height:26px;font-weight:700}
+p{font-size:14px;line-height:24px}
+.stack{display:flex;flex-direction:column;gap:8px}
+.sm{font-size:12px;line-height:18px}
+.link{font-weight:700;color:var(--primary-dark);text-decoration:underline}
+
+/* Botões */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;padding:16px;border-radius:var(--r);font-weight:700;font-size:16px;line-height:24px;text-align:center;border:1px solid transparent}
+.btn.primary{background:var(--primary-dark);color:var(--surface)}
+.btn.outline{background:var(--surface);color:var(--primary-dark);border-color:var(--primary-dark)}
+.btn.soft{background:#f0f0fa;color:var(--primary-dark);border-color:#4d54a8}
+.btn.danger{background:var(--surface);color:var(--danger);border-color:#8a1c1c}
+.btn.dark-outline{border-color:#20212c;color:#20212c;background:var(--surface)}
+.btn img,.btn svg{width:24px;height:24px}
+.link-btn{display:block;width:100%;text-align:center;font-weight:700;color:var(--primary-dark);padding:12px}
+
+/* Splash / login */
+#splash{background:linear-gradient(#282e62,#1b1f45);align-items:center;justify-content:center;color:#fff;gap:24px}
+#splash img{width:84px}
+.brand{background:var(--primary);height:188px;flex:none;display:flex;align-items:center;justify-content:center}
+.brand img{width:78px}
+.brand.sm{height:auto;padding:24px 16px;align-items:flex-start;justify-content:flex-start;flex-direction:column;gap:8px;color:#fff}
+
+/* Campos */
+.field{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);height:56px;display:flex;align-items:center;padding:0 16px;margin-top:14px}
+.field label{position:absolute;top:-9px;left:12px;background:var(--surface);padding:0 4px;font-size:11px;color:var(--muted);border-radius:4px}
+.field input{flex:1;border:0;outline:0;font:inherit;font-size:16px;background:none;min-width:0}
+.field button{font-weight:700;color:var(--primary-dark)}
+
+/* Cartões */
+.card{background:var(--surface);border-radius:var(--r);padding:16px}
+.opt{display:flex;align-items:center;gap:16px;width:100%;padding:16px;background:var(--surface);border-radius:var(--r);margin-bottom:16px}
+.opt .txt{flex:1}
+.opt b{display:block;font-size:14px}
+.opt small{display:block;font-size:12px;line-height:16px;color:var(--muted)}
+.ico-circle{width:40px;height:40px;border-radius:50%;background:#ececf4;display:flex;align-items:center;justify-content:center;flex:none;color:var(--primary)}
+.ico-circle svg{width:22px;height:22px}
+.chev{width:24px;height:24px;flex:none}
+
+/* Hero azul */
+.hero{background:var(--primary);height:100px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff}
+.hero.green{background:var(--success)}
+.hero svg{width:44px;height:44px}
+.list-dot{padding-left:18px;font-size:14px}
+.list-dot li{line-height:32px}
+
+/* Passos */
+.steps{position:relative;margin-top:12px}
+.step{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.step:not(:last-child)::before{content:"";position:absolute;left:11px;top:26px;bottom:2px;border-left:1.5px dashed #7a80c8}
+.step i{flex:none;width:24px;height:24px;border:2px solid var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Open Sans';font-style:normal;color:var(--primary);background:var(--bg)}
+.step b{display:block;font-size:14px;line-height:22px}
+.step span{font-size:14px;line-height:24px}
+
+/* Câmera */
+.cam{background:var(--camera);border-radius:var(--r);position:relative;flex:1;min-height:200px}
+.cam{overflow:hidden}
+.camv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#141414;border-radius:inherit}
+.camv.mirror{transform:scaleX(-1)}
+.cam-msg{position:absolute;left:20px;right:20px;top:50%;transform:translateY(-50%);text-align:center;color:#cfd0da;font-size:13px;line-height:20px;z-index:3;pointer-events:none}
+.cam .frame-doc,.cam .frame-face{z-index:2}
+.cam .frame-doc{position:absolute;inset:40px;border:2px dashed #fff;border-radius:4px}
+.cam .frame-face{position:absolute;left:50%;top:50%;width:180px;height:280px;transform:translate(-50%,-50%);border:2px dotted #fff;border-radius:50%}
+.cam.scan::after{content:"";position:absolute;left:12%;right:12%;height:2px;background:#6c74ff;box-shadow:0 0 12px #6c74ff;top:10%;animation:scan 2.2s ease-in-out infinite alternate}
+@keyframes scan{to{top:88%}}
+.nfc{background:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;height:336px;margin-top:20px}
+.nfc svg{width:192px;height:192px}
+.center-t{text-align:center}
+
+/* Loading */
+.loading{align-items:center;justify-content:center;gap:24px;text-align:center}
+.loading b{font-size:15px}
+.spin{width:54px;height:54px;border:4px solid var(--primary-dark);border-right-color:transparent;border-radius:50%;animation:rot 1s linear infinite;margin:0 auto 24px}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* Credencial */
+.cred-head{background:var(--primary-mid);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 16px;font-weight:700;font-size:14px;border-radius:var(--r) var(--r) 0 0}
+.cred-head svg{width:22px;height:22px}
+.cred{background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.cred .in{padding:16px;display:flex;flex-direction:column;gap:12px}
+.cred .photo{width:100px;height:120px;border-radius:6px;object-fit:cover;margin:0 auto}
+.cred .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 8px}
+.cred dt{font-weight:700;font-size:13px;line-height:20px}
+.cred dd{font-size:11.5px;line-height:18px;color:#222}
+.mrz{font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:14px;word-break:break-all;color:#222}
+
+/* Carteira */
+.wallet-card{display:flex;align-items:center;gap:16px;width:100%;background:var(--surface);border-left:6px solid var(--primary);padding:16px;border-radius:4px;margin-bottom:16px}
+.wallet-card .txt{flex:1}
+.wallet-card small{display:block;font-size:12px;color:#333}
+.wallet-card strong{display:block;font-size:14px;margin:4px 0}
+.empty{border:1px dashed var(--primary);border-radius:var(--r);padding:16px;margin-top:20px;background:#f7f7f9}
+.empty .row{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.empty b{font-size:14px}
+.empty small{display:block;font-size:12px;color:var(--muted)}
+.tabbar{flex:none;height:64px;background:var(--surface);border-top:1px solid var(--line);display:flex}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#6f7280}
+.tabbar button svg{width:24px;height:24px}
+.tabbar button.on{color:var(--primary-dark);font-weight:700}
+
+/* Modal */
+.sheet-wrap{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;z-index:10}
+.sheet-wrap.open{display:flex}
+.sheet{background:var(--surface);width:100%;border-radius:20px 20px 0 0;padding:16px;display:flex;flex-direction:column;gap:12px}
+.sheet .x{align-self:flex-end;width:24px;height:24px;position:absolute;right:16px;top:16px}
+.sheet .face{width:50px;height:50px;color:var(--primary);margin:0 auto}
+
+/* Opções */
+.menu{background:var(--surface)}
+.menu button{display:flex;align-items:center;gap:16px;width:100%;padding:16px;border-bottom:1px solid var(--line);font-size:14px}
+.menu button>span:not(.ico-circle):not(.flag){flex:1;text-align:left}
+.toggle{width:56px;height:32px;border-radius:16px;background:#a8a8ac;position:relative;flex:none;transition:.2s}
+.toggle::after{content:"";position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on{background:var(--primary-dark)}
+.toggle.on::after{left:28px}
+.flag{width:40px;height:40px;border-radius:50%;overflow:hidden;flex:none;background:#ececf4;display:flex;align-items:center;justify-content:center}
+.flag svg{width:22px;height:16px}
+
+.toast{position:absolute;left:16px;right:16px;bottom:88px;background:#222;color:#fff;border-radius:var(--r);padding:12px 16px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:20}
+.toast.show{opacity:1}
+</style>
+</head>
+<body class="phone">
+<header class="toolbar">
+  <div class="tt"><svg width="20" height="20" style="color:#8f95ff"><use href="#i-wallet"/></svg>uBu Wallet <span>· protótipo navegável</span></div>
+  <div class="menu-wrap">
+    <button class="tb" id="flowBtn" aria-haspopup="true" aria-expanded="false"><svg><use href="#i-flows"/></svg><span>Fluxos</span></button>
+    <div class="flows" id="flowMenu" role="menu"></div>
+  </div>
+  <div class="seg" role="group" aria-label="Language" title="Language / Idioma / Idioma">
+    <button data-uilang="pt" title="Português">PT</button>
+    <button data-uilang="en" title="English" class="on">EN</button>
+    <button data-uilang="es" title="Español">ES</button>
+  </div>
+  <div class="seg view" role="group" aria-label="Visualização">
+    <button id="vPhone" class="on"><svg><use href="#i-phone"/></svg>App</button>
+    <button id="vWeb"><svg><use href="#i-monitor"/></svg>Web</button>
+  </div>
+  <button class="tb" id="restartBtn"><svg><use href="#i-refresh"/></svg><span>Reiniciar</span></button>
+</header>
+<main class="stage" id="stage">
+<div class="device" id="device">
+<div class="notch"></div>
+<div class="sb light" id="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.500" width="3" height="9.500" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 26 12"><rect x="0.500" y="0.500" width="22" height="11" rx="3.500" fill="none" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="19" height="8" rx="2"/><rect x="24" y="4" width="2" height="4" rx="1" opacity=".5"/></svg></span></div>
+<div class="app" id="app">
+
+<!-- ICONES (sprite) -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path fill="currentColor" d="M17.650 6.350A7.950 7.950 0 0 0 12 4a8 8 0 1 0 7.730 10h-2.080A6 6 0 1 1 12 6c1.660 0 3.140.690 4.220 1.780L13 11h7V4z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H8a3 3 0 0 0-3 3v16a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V4a3 3 0 0 0-3-3zm1 19a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1zm-5-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><path fill="currentColor" d="M21 3H3a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h7v2H8v2h8v-2h-2v-2h7a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 13H3V5h18z"/></symbol>
+  <symbol id="i-flows" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5h2v2H3zm4 0h14v2H7zM3 11h2v2H3zm4 0h14v2H7zM3 17h2v2H3zm4 0h14v2H7z"/></symbol>
+  <symbol id="i-google" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.500c3.500 0 6.600 1.200 9.100 3.600l6.800-6.800C35.800 2.400 30.300 0 24 0 14.600 0 6.500 5.400 2.600 13.200l7.900 6.100C12.400 13.600 17.700 9.500 24 9.500z"/><path fill="#4285F4" d="M46.500 24.500c0-1.600-.1-3.100-.4-4.500H24v9h12.700c-.6 3-2.300 5.500-4.800 7.200l7.600 5.900c4.500-4.100 7-10.200 7-17.600z"/><path fill="#FBBC05" d="M10.500 28.700A14.500 14.500 0 0 1 9.500 24c0-1.600.3-3.200.9-4.700l-7.900-6.100A24 24 0 0 0 0 24c0 3.900.9 7.500 2.600 10.800z"/><path fill="#34A853" d="M24 48c6.500 0 11.900-2.100 15.900-5.800l-7.600-5.900c-2.100 1.400-4.900 2.300-8.300 2.300-6.300 0-11.600-4.100-13.500-9.800l-7.900 6.100C6.500 42.600 14.600 48 24 48z"/></symbol>
+  <symbol id="i-userplus" viewBox="0 0 24 24"><path fill="currentColor" d="M15 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2zm9 4c-2.700 0-8 1.300-8 4v2h16v-2c0-2.700-5.300-4-8-4z"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-2.700 0-8 1.300-8 4v2h16v-2c0-2.700-5.300-4-8-4z"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><path fill="currentColor" d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.500 13.500l2.500 3 3.500-4.500 4.500 6H5z"/></symbol>
+  <symbol id="i-tick" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.200 4.800 12l-1.400 1.400L9 19 21 7l-1.400-1.400z"/></symbol>
+  <symbol id="i-back"viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path fill="currentColor" d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></symbol>
+  <symbol id="i-id" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 14H4V6h16zM13 9h5v1.5h-5zm0 3h5v1.5h-5zM9 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3.5 4.5c0-1.7-2.3-2.5-3.5-2.5s-3.5.8-3.5 2.5V17h7z"/></symbol>
+  <symbol id="i-badge" viewBox="0 0 24 24"><path fill="currentColor" d="M20 7h-5V4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v3H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM11 4h2v5h-2zm9 16H4V9h5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2h5zM9 18c0-1.3 1.8-2 3-2s3 .7 3 2v.5H9zm3-3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></symbol>
+  <symbol id="i-passport" viewBox="0 0 24 24"><path fill="currentColor" d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 18H6V4h12zM12 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6.5c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zM8 16h8v1.5H8z"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path fill="currentColor" d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2 7.2 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.2L15 2zm3 16a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></symbol>
+  <symbol id="i-face" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h4V2H4a2 2 0 0 0-2 2v4h2zm16-2h-4v2h4v4h2V4a2 2 0 0 0-2-2zM4 16H2v4a2 2 0 0 0 2 2h4v-2H4zm16 4h-4v2h4a2 2 0 0 0 2-2v-4h-2zM9 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 7c2.2 0 4-1.3 4.7-3H7.3c.7 1.7 2.5 3 4.7 3zm0-12a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm0 12.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path fill="currentColor" d="M18 16c-.8 0-1.5.3-2 .8l-7.1-4.2c.1-.2.1-.4.1-.6s0-.4-.1-.6L16 7.2c.5.5 1.2.8 2 .8a3 3 0 1 0-3-3c0 .2 0 .4.1.6L8 9.8A3 3 0 1 0 8 14.2l7.1 4.2c-.1.2-.1.4-.1.6a3 3 0 1 0 3-3z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-1.3-5.4L7.9 11.8l-1.4 1.4 4.2 4.2 7-7-1.4-1.4z"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path fill="currentColor" d="M21 7H5a1 1 0 0 1 0-2h14V3H5a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1zm-4 8a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm10-2h2v2h-2zm-2 2h2v2h-2zm4 0h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm-4 0h2v2h-2z"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path fill="currentColor" d="m19.4 13 .1-1-.1-1 2.1-1.6c.2-.2.2-.4.1-.6l-2-3.5c-.1-.2-.4-.3-.6-.2l-2.5 1a7 7 0 0 0-1.7-1l-.4-2.6c0-.2-.2-.4-.5-.4h-4c-.3 0-.5.2-.5.4l-.4 2.6c-.6.3-1.200.6-1.700 1l-2.500-1c-.2-.1-.5 0-.6.200l-2 3.500c-.1.200-.1.500.1.600L4.600 11l-.1 1 .1 1-2.100 1.600c-.2.200-.2.400-.1.600l2 3.500c.1.200.4.300.6.200l2.500-1c.5.400 1.100.7 1.700 1l.4 2.600c0 .2.200.4.500.4h4c.3 0 .5-.2.500-.4l.4-2.600c.6-.3 1.200-.6 1.700-1l2.500 1c.2.100.5 0 .6-.2l2-3.500c.1-.2.100-.5-.1-.6zM12 15.500a3.500 3.500 0 1 1 0-7 3.500 3.500 0 0 1 0 7z"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><path fill="currentColor" d="M12.650 10A5.990 5.990 0 0 0 7 6a6 6 0 0 0 0 12 5.990 5.990 0 0 0 5.650-4H17v4h4v-4h2v-4zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.900 6h-2.900a15.700 15.700 0 0 0-1.400-3.600A8 8 0 0 1 18.900 8zM12 4c.8 1.200 1.500 2.500 1.900 4h-3.800c.4-1.500 1.100-2.800 1.900-4zM4.300 14a8 8 0 0 1 0-4h3.400a16.500 16.500 0 0 0 0 4zm.8 2h2.900c.3 1.300.8 2.500 1.400 3.600A8 8 0 0 1 5.100 16zM8 8H5.100a8 8 0 0 1 4.300-3.600C8.800 5.500 8.300 6.700 8 8zm4 12c-.8-1.200-1.500-2.500-1.900-4h3.800c-.4 1.500-1.100 2.800-1.900 4zm2.300-6H9.700a14.700 14.700 0 0 1 0-4h4.600a14.700 14.700 0 0 1 0 4zm.3 5.600c.6-1.100 1.100-2.300 1.400-3.600h2.900a8 8 0 0 1-4.300 3.600zm1.700-5.600a16.500 16.500 0 0 0 0-4h3.400a8 8 0 0 1 0 4z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path fill="currentColor" d="M21 5c-1.100-.4-2.300-.5-3.500-.5-1.900 0-4.100.4-5.500 1.500-1.400-1.100-3.600-1.500-5.500-1.500S2.900 4.800 1.500 5.500v14.600c0 .2.200.4.400.4.100 0 .2 0 .3-.1 1.100-.5 2.900-1 4.300-1 1.900 0 4.100.4 5.500 1.500 1.300-.8 3.800-1.500 5.500-1.500 1.500 0 3.100.3 4.400 1 .1 0 .2.100.3.100.2 0 .4-.2.400-.4V5.500C22.200 5.300 21.700 5.200 21 5zm0 13c-1.100-.3-2.200-.5-3.500-.5-1.700 0-3.700.6-5 1.300V7.500c1.300-1 3.200-1.500 5-1.500 1.200 0 2.400.2 3.500.6z"/></symbol>
+  <symbol id="i-door" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3h9v2H7v14h7v2H5zm11 4 5 5-5 5-1.400-1.400L17.200 13H9v-2h8.200l-2.600-2.600z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.400 17.600 5 12 10.600 6.400 5 5 6.400 10.600 12 5 17.600 6.400 19 12 13.400 17.600 19 19 17.600 13.400 12z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm1-13h-2v4H7v2h4v4h2v-4h4v-2h-4z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14zM12 17l-4-4h3v-3h2v3h3z"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path fill="currentColor" d="M19 5h-2V3H7v2H5a2 2 0 0 0-2 2v1c0 2.500 1.900 4.600 4.300 4.900A5 5 0 0 0 11 16.900V19H8v2h8v-2h-3v-2.100a5 5 0 0 0 3.700-3.900C19.100 12.600 21 10.500 21 8V7a2 2 0 0 0-2-2zM5 8V7h2v3.800C5.800 10.400 5 9.300 5 8zm14 0c0 1.300-.8 2.400-2 2.800V7h2zm-7 7a3 3 0 0 1-3-3V5h6v7a3 3 0 0 1-3 3z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 14H4V8l8 5 8-5zm-8-7L4 6h16z"/></symbol>
+  <symbol id="i-apple" viewBox="0 0 24 24"><path fill="currentColor" d="M16.400 12.600c0-2.300 1.900-3.400 2-3.500-1.100-1.600-2.800-1.800-3.400-1.800-1.400-.1-2.800.9-3.500.9s-1.800-.8-3-.8C6.900 7.400 5.500 8.300 4.700 9.700c-1.600 2.800-.4 6.900 1.200 9.100.8 1.100 1.700 2.300 2.900 2.300 1.200 0 1.600-.7 3-.7s1.800.7 3 .7c1.300 0 2.100-1.100 2.800-2.200.9-1.300 1.300-2.500 1.300-2.600-.1 0-2.500-1-2.500-3.700zM14.100 5.800c.6-.8 1.100-1.800.9-2.800-.9 0-2 .6-2.600 1.400-.6.700-1.100 1.700-.9 2.700 1 .1 2-.5 2.600-1.300z"/></symbol>
+</svg>
+
+<!-- ========== ONBOARDING ========== -->
+<section class="screen active" id="splash" data-auto="login" data-delay="1800">
+  <img src="assets/logo.png" alt="uBu">
+  <span style="font-size:14px">Powered by Valid</span>
+</section>
+
+<section class="screen" id="login">
+  <div class="brand"><img src="assets/logo.png" alt="uBu"></div>
+  <div class="body stack" style="gap:20px;padding:24px 16px">
+    <div class="stack"><h1>Acesse sua carteira</h1><p>Selecione como você quer acessar</p></div>
+    <div class="stack" style="gap:24px">
+      <button class="btn primary" data-go="login-email"><img src="assets/mail.svg" alt="">E-mail e senha</button>
+      <button class="btn outline" data-go="social-google"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.100 3.600l6.800-6.800C35.800 2.400 30.300 0 24 0 14.600 0 6.500 5.400 2.600 13.200l7.900 6.100C12.400 13.600 17.700 9.500 24 9.500z"/><path fill="#4285F4" d="M46.500 24.500c0-1.600-.1-3.100-.4-4.500H24v9h12.700c-.6 3-2.300 5.500-4.800 7.200l7.600 5.900c4.500-4.100 7-10.200 7-17.600z"/><path fill="#FBBC05" d="M10.500 28.700A14.500 14.500 0 0 1 9.500 24c0-1.600.3-3.200.9-4.700l-7.900-6.100A24 24 0 0 0 0 24c0 3.900.9 7.500 2.600 10.800z"/><path fill="#34A853" d="M24 48c6.500 0 11.900-2.100 15.900-5.800l-7.600-5.900c-2.100 1.400-4.900 2.300-8.300 2.300-6.300 0-11.600-4.100-13.500-9.800l-7.900 6.100C6.500 42.600 14.600 48 24 48z"/></svg>Continuar com Google</button>
+      <button class="btn outline" data-go="social-apple"><svg><use href="#i-apple"/></svg>Continuar com Apple</button>
+    </div>
+    <div class="stack center-t" style="padding-top:4px"><p>Ainda não tem uma conta?</p>
+      <button class="btn dark-outline" data-go="signup">Criar conta</button></div>
+  </div>
+</section>
+
+<section class="screen" id="login-email">
+  <div class="brand tall"><div class="obar"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Acessar</div><img src="assets/logo.png" alt="uBu"></div>
+  <div class="body" style="padding:16px">
+    <h1>Acesse sua carteira</h1>
+    <p>Informe o seu e-mail e senha para continuar.</p>
+    <div class="field"><label>E-mail</label><input type="email" placeholder="E-mail" autocomplete="off"><button data-act="clear-field" aria-label="Limpar"><svg width="24" height="24"><use href="#i-close"/></svg></button></div>
+    <div class="field"><label>Digite a senha</label><input type="password" placeholder="Digite a senha" autocomplete="off"><button data-act="toggle-pwd">Mostrar</button></div>
+    <button class="link-btn" style="margin:20px 0 12px" data-toast="Recuperação de senha não faz parte do protótipo">Esqueci minha senha</button>
+    <button class="btn primary" data-act="login-submit">Entrar</button>
+  </div>
+</section>
+
+<section class="screen" id="signup">
+  <div class="brand tall compact"><div class="obar" style="height:48px"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Criar conta</div><img src="assets/logo.png" alt="uBu"></div>
+  <div class="body" style="padding:16px">
+    <h1>Crie sua conta</h1>
+    <p>Preencha seus dados para criar sua carteira.</p>
+    <div class="field" id="f-name"><label>Nome completo</label><input type="text" placeholder="Nome completo" autocomplete="off"></div>
+    <div class="err" data-err="name">Informe seu nome completo.</div>
+    <div class="field" id="f-mail"><label>E-mail</label><input type="email" placeholder="E-mail" autocomplete="off"></div>
+    <div class="err" data-err="mail">Informe um e-mail válido.</div>
+    <div class="field" id="f-pwd"><label>Crie uma senha</label><input type="password" placeholder="Crie uma senha" autocomplete="off"><button data-act="toggle-pwd">Mostrar</button></div>
+    <div class="err" data-err="pwd">A senha precisa ter ao menos 8 caracteres.</div>
+    <div class="field" id="f-pwd2"><label>Confirme a senha</label><input type="password" placeholder="Confirme a senha" autocomplete="off"><button data-act="toggle-pwd">Mostrar</button></div>
+    <div class="err" data-err="pwd2">As senhas não conferem.</div>
+    <div class="check" id="terms-check" role="checkbox" aria-checked="false" tabindex="0"><i data-act="toggle-check"><svg><use href="#i-tick"/></svg></i><span data-act="toggle-check">Li e concordo com os <button class="link" data-go="terms">termos de uso</button>.</span></div>
+    <div class="err" data-err="terms">Aceite os termos de uso para continuar.</div>
+    <button class="btn primary" style="margin-top:20px" data-act="signup-submit">Criar conta</button>
+    <button class="link-btn" style="margin-top:8px" data-go="login" data-reset-stack>Já tenho uma conta</button>
+  </div>
+</section>
+
+<section class="screen" id="social-google">
+  <div class="bar"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Continuar com Google</div>
+  <div class="body">
+    <div class="id-badge"><svg><use href="#i-google"/></svg></div>
+    <h1>Escolha uma conta</h1>
+    <p>para continuar no uBu Wallet</p>
+    <div class="group" id="accts">
+      <button class="acct sel" data-act="pick-acct" data-name="Maria Fernanda da Silva" data-email="maria.silva@gmail.com"><span class="avatar" style="background:#1a73e8">M</span><span class="t"><b>Maria Fernanda da Silva</b><small>maria.silva@gmail.com</small></span><span class="radio"></span></button>
+      <button class="acct" data-act="pick-acct" data-name="Maria Fernanda da Silva" data-email="maria.silva@empresa.com.br"><span class="avatar" style="background:#188038">M</span><span class="t"><b>Maria Fernanda da Silva (trabalho)</b><small>maria.silva@empresa.com.br</small></span><span class="radio"></span></button>
+      <button class="acct" data-toast="Adicionar outra conta não faz parte do protótipo"><span class="avatar" style="background:#e8eaed;color:#444"><svg width="22" height="22"><use href="#i-userplus"/></svg></span><span class="t"><b>Usar outra conta</b></span></button>
+    </div>
+    <div class="group">
+      <div class="group-h">O uBu Wallet vai receber</div>
+      <div class="perm"><svg><use href="#i-person"/></svg>Seu nome</div>
+      <div class="perm"><svg><use href="#i-mail"/></svg>Seu endereço de e-mail</div>
+      <div class="perm" style="padding-bottom:12px"><svg><use href="#i-image"/></svg>Sua foto de perfil</div>
+    </div>
+    <p class="note">Antes de usar este app, você pode consultar os <button class="link" data-go="terms">termos de uso</button> do uBu Wallet. O Google não compartilha sua senha com o app.</p>
+  </div>
+  <div class="foot"><button class="btn primary" data-act="google-continue" data-go="load-wallet">Continuar</button><button class="btn outline" data-back>Cancelar</button></div>
+</section>
+
+<section class="screen" id="social-apple">
+  <div class="bar"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Continuar com Apple</div>
+  <div class="body">
+    <div class="id-badge apple"><svg><use href="#i-apple"/></svg></div>
+    <h1>Criar conta com a Apple</h1>
+    <p>Use sua conta Apple para criar sua carteira uBu. Não pedimos senha.</p>
+    <div class="group">
+      <div class="group-h">Nome</div>
+      <div class="field" style="margin:6px 16px 16px"><label style="display:block">Nome</label><input type="text" value="Maria Fernanda da Silva" autocomplete="off"></div>
+    </div>
+    <div class="group" id="mailopts">
+      <div class="group-h">E-mail</div>
+      <button class="acct sel" data-act="pick-mail" data-email="maria.silva@icloud.com"><span class="t"><b>Compartilhar meu e-mail</b><small>maria.silva@icloud.com</small></span><span class="radio"></span></button>
+      <button class="acct" data-act="pick-mail" data-email="x7k2p9@privaterelay.appleid.com"><span class="t"><b>Ocultar meu e-mail</b><small>Encaminhamento privado: x7k2p9@privaterelay.appleid.com</small></span><span class="radio"></span></button>
+    </div>
+    <p class="note">A Apple não cria perfil sobre você nem sobre suas atividades no app. Você pode revisar isso depois em Ajustes › Conta Apple › Senha e Segurança › Apps que usam a Conta Apple.</p>
+  </div>
+  <div class="foot"><button class="btn primary" data-open="faceid-apple"><svg><use href="#i-face"/></svg>Continuar com Face ID</button><button class="btn outline" data-back>Cancelar</button></div>
+  <div class="sheet-wrap" id="faceid-apple">
+    <div class="sheet" style="position:relative;padding-top:28px">
+      <button class="x" data-close aria-label="Fechar"><svg width="24" height="24"><use href="#i-close"/></svg></button>
+      <svg class="face" style="margin:0;width:48px;height:48px"><use href="#i-face"/></svg>
+      <h2>Face ID</h2>
+      <p style="font-size:15px;line-height:28px">Confirme sua identidade para continuar com a Apple.</p>
+      <button class="btn primary" data-act="apple-continue" data-go="load-wallet" data-close>Validar</button>
+      <button class="btn outline" data-close>Cancelar</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen loading" id="load-wallet" data-auto="welcome" data-delay="2200">
+  <div><div class="spin"></div><b>Preparando sua carteira</b></div>
+</section>
+
+<section class="screen" id="welcome">
+  <div class="brand"><img src="assets/logo.png" alt="uBu"></div>
+  <div class="body" style="padding:24px 16px 0">
+    <h1 style="margin-bottom:16px">Boas vindas à sua carteira!</h1>
+    <div class="card stack" style="gap:12px;padding:16px">
+      <h1 style="font-size:18px">Credenciais verificáveis</h1>
+      <p>É uma forma de compartilhar seus dados sem enviar uma foto do documento oficial. Você pode usar seu passaporte ou inserir seus dados manualmente.</p>
+      <h1 style="display:flex;align-items:center;gap:8px;font-size:16px;margin-top:8px"><svg width="24" height="24"><use href="#i-trophy"/></svg>Vantagens</h1>
+      <ul class="list-dot" style="font-size:14px;line-height:28px">
+        <li>Envie seus dados sem enviar uma foto do seu documento físico;</li>
+        <li>Controle seus dados: mantenha suas informações com você e compartilhe apenas o necessário;</li>
+        <li>A credencial é válida como documento oficial.</li>
+      </ul>
+    </div>
+    <p class="sm center-t" style="margin:24px 8px 16px;font-size:12px;line-height:18px">Ao continuar, você concorda com a forma como protegemos seus dados, conforme descrito em <button class="link" data-go="terms">nossos termos de uso.</button></p>
+  </div>
+  <div class="foot"><button class="btn primary" data-go="home" data-act="reset-wallet">Começar</button></div>
+</section>
+
+<section class="screen" id="terms">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Termos e condições de uso</div>
+  <div class="body"><div class="card stack" style="gap:2px">
+    <b style="font-size:16px;line-height:26px">Uso pessoal e intransferível</b>
+    <p style="font-size:15px;line-height:30px">Ao seguir com esta solicitação, você declara estar ciente de que o certificado digital em nuvem é de uso pessoal e intransferível, e que seu uso depende da validação das informações fornecidas no processo de emissão.</p>
+    <b style="font-size:16px;line-height:26px">Autenticação e responsabilidade</b>
+    <p style="font-size:15px;line-height:30px">Você também reconhece que a autenticação e a assinatura digital realizadas por meio da solução VIDaaS exigem confirmação de identidade e devem ser utilizadas de forma segura, sob sua exclusiva responsabilidade.</p>
+    <b style="font-size:16px;line-height:26px">Item 03 do termo de uso</b>
+    <p style="font-size:15px;line-height:30px">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris</p>
+  </div></div>
+  <div class="foot"><button class="btn primary" data-back>Voltar</button></div>
+</section>
+
+<!-- ========== HOME ========== -->
+<section class="screen" id="home">
+  <div class="brand sm"><img src="assets/logo-horizontal.png" alt="uBu" style="height:28px;width:auto;display:block"><span style="font-size:16px"><span>Olá,</span> <span id="u-first">Maria</span></span></div>
+  <div class="body" id="home-body"></div>
+  <div class="tabbar" data-tabs="home"></div>
+</section>
+
+<!-- ========== TIPO DE CREDENCIAL ========== -->
+<section class="screen" id="tipo">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Tipo de credencial</div>
+  <div class="body">
+    <h1 style="font-size:18px;line-height:24px;margin-bottom:8px">Qual informação você quer compartilhar?</h1>
+    <p style="font-size:15px;line-height:32px;margin-bottom:16px">Vamos criar uma credencial com apenas as informações que você precisa enviar.</p>
+    <button class="opt" data-go="como" data-set="tipo=passaporte"><span class="ico-circle"><svg><use href="#i-id"/></svg></span><span class="txt"><b>Um documento</b><small>Use seu passaporte para criar a credencial</small></span><svg class="chev"><use href="#i-chev"/></svg></button>
+    <button class="opt" data-go="dados-form" data-set="tipo=dados"><span class="ico-circle"><svg><use href="#i-badge"/></svg></span><span class="txt"><b>Dados pessoais</b><small>Informe manualmente os dados que você quer compartilhar</small></span><svg class="chev"><use href="#i-chev"/></svg></button>
+  </div>
+</section>
+
+<section class="screen" id="como">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Credenciais</div>
+  <div class="hero"><svg><use href="#i-id"/></svg></div>
+  <div class="body">
+    <h1 style="font-size:18px">Como funciona sua credencial</h1>
+    <div class="steps">
+      <div class="step"><i>1</i><div><b>Escolha como criar</b><span>Use seu passaporte ou insira seus dados manualmente.</span></div></div>
+      <div class="step"><i>2</i><div><b>Confirmação dos dados</b><span>Vamos validar seus dados e confirmar que pertencem a você.</span></div></div>
+      <div class="step"><i>3</i><div><b>Criação da credencial</b><span>Vamos criar uma credencial para você usar.</span></div></div>
+      <div class="step"><i>4</i><div><b>Uso da credencial</b><span>Quando precisar apresentar seu documento ou seus dados, compartilhe-os pelo código QR de quem está solicitando.</span></div></div>
+    </div>
+  </div>
+  <div class="foot"><button class="btn primary" data-go="val-doc">Criar credencial</button></div>
+</section>
+
+<!-- ========== VALIDAÇÃO DO DOCUMENTO ========== -->
+<section class="screen" id="val-doc">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Validação da identidade</div>
+  <div class="hero"><svg><use href="#i-camera"/></svg></div>
+  <div class="body">
+    <h1 style="font-size:18px;margin-bottom:8px">Vamos tirar uma foto do seu passaporte</h1>
+    <ul class="list-dot" style="font-size:15px">
+      <li style="line-height:32px">O documento deve estar em bom estado, sem rasgos, manchas ou dados apagados;</li>
+      <li style="line-height:32px">Coloque o documento aberto dentro da área indicada e em superfície plana e estável;</li>
+      <li style="line-height:32px">Esteja em um lugar com boa iluminação para que os dados fiquem nítidos e legíveis.</li>
+    </ul>
+  </div>
+  <div class="foot" style="gap:16px"><button class="btn soft" data-go="dados-form" data-set="tipo=dados">Informar dados manualmente</button><button class="btn primary" data-go="cam-doc" data-act="doc-photo">Tirar foto documento</button></div>
+</section>
+
+<section class="screen" id="dados-form">
+  <div class="bar"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Credencial de dados</div>
+  <div class="body" id="dados-body">
+    <h2 style="font-size:24px;line-height:32px;margin-bottom:8px">Auto declaração de dados</h2>
+    <p style="font-size:15px;line-height:32px">Informe quais informações você quer compartilhar:</p>
+    <div class="cell"><div class="field" id="dd-name"><label>Nome</label><input type="text" placeholder="Nome" autocomplete="off" ><button data-act="clear-field" aria-label="Limpar"><svg width="24" height="24"><use href="#i-close"/></svg></button></div><div class="err" data-err="dd-name">Informe seu nome completo.</div></div>
+    <div class="cell"><div class="field" id="dd-mail"><label>E-mail</label><input type="email" placeholder="E-mail" autocomplete="off" ><button data-act="clear-field" aria-label="Limpar"><svg width="24" height="24"><use href="#i-close"/></svg></button></div><div class="err" data-err="dd-mail">Informe um e-mail válido.</div></div>
+    <div class="cell"><div class="field" id="dd-phone"><label>Telefone</label><input type="tel" placeholder="Telefone" autocomplete="off" inputmode="tel"><button data-act="clear-field" aria-label="Limpar"><svg width="24" height="24"><use href="#i-close"/></svg></button></div><div class="err" data-err="dd-phone">Informe um telefone válido.</div></div>
+    <div class="or"><span>Ou</span></div>
+    <button class="btn outline fill" data-act="fill-social"><svg viewBox="0 0 48 48"><use href="#i-google"/></svg>Preencher com a conta do Google</button>
+    <button class="btn outline fill" style="margin-top:12px" data-act="fill-social"><svg><use href="#i-apple"/></svg>Preencher com a conta da Apple</button>
+  </div>
+  <div class="foot"><button class="btn outline" data-back>Voltar</button><button class="btn primary" data-act="dados-submit">Confirmar dados</button></div>
+</section>
+
+<section class="screen" id="cam-doc" data-auto="nfc" data-delay="3200">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Leitura do documento</div>
+  <div class="body" style="display:flex;flex-direction:column;gap:16px">
+    <h1 style="font-size:18px;line-height:24px">Posicione o documento aberto dentro da área indicada e mantenha até tirar a foto.</h1>
+    <div class="cam scan"><video class="camv" playsinline muted autoplay></video><div class="frame-doc"></div><div class="cam-msg"></div></div>
+  </div>
+  <div class="foot"><button class="btn soft" data-go="dados-form" data-set="tipo=dados">Informar dados manualmente</button></div>
+</section>
+
+<section class="screen" id="nfc" data-auto="load-doc" data-delay="3200">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Leitura do documento</div>
+  <div class="body">
+    <h2 style="font-size:22px;line-height:32px">Encoste o documento do seu dispositivo para leitura por aproximação:</h2>
+    <div class="nfc"><svg viewBox="0 0 192 192"><circle cx="96" cy="96" r="94" fill="none" stroke="#111" stroke-width="4"/><circle cx="96" cy="96" r="48" fill="none" stroke="#111" stroke-width="4"/><circle cx="96" cy="96" r="13" fill="none" stroke="#111" stroke-width="4"/></svg></div>
+    <p class="center-t" style="margin-top:36px;font-size:15px">Aproxime o documento</p>
+  </div>
+  <div class="foot"><button class="btn soft" style="border-color:var(--primary-dark)" data-go="load-doc">Cancelar</button></div>
+</section>
+
+<section class="screen loading" id="load-doc" data-auto="rosto-intro" data-delay="2200">
+  <div><div class="spin"></div><b>Validando documento</b></div>
+</section>
+
+<!-- ========== FOTO DO ROSTO ========== -->
+<section class="screen" id="rosto-intro">
+  <div class="bar center">Validação da identidade</div>
+  <div class="hero"><svg><use href="#i-face"/></svg></div>
+  <div class="body">
+    <h2 style="margin-bottom:8px">Vamos tirar uma foto do seu rosto</h2>
+    <p id="rosto-lead" style="display:none">Isso vai garantir que você é a mesma pessoa da foto do passaporte.</p>
+    <ul class="list-dot" style="font-size:15px">
+      <li style="line-height:32px">Posicione o rosto dentro da área indicada;</li>
+      <li style="line-height:32px">Esteja em um lugar com boa iluminação para que seu rosto fique nítido e visível;</li>
+      <li style="line-height:32px">Não use acessórios que cubram o rosto, como óculos escuros, bonés, máscaras.</li>
+    </ul>
+  </div>
+  <div class="foot"><button class="btn primary" data-go="cam-face">Tirar foto do rosto</button></div>
+</section>
+
+<section class="screen" id="cam-face" data-auto="load-face" data-delay="3500">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Leitura do rosto</div>
+  <div class="body" style="display:flex;flex-direction:column;gap:8px">
+    <b style="font-size:16px;line-height:22px">Mantenha o rosto dentro da área indicada.</b>
+    <p>Fique imóvel até finalizar a captura da foto.</p>
+    <div class="cam" style="margin-top:8px"><video class="camv" playsinline muted autoplay></video><div class="frame-face"></div><div class="cam-msg"></div></div>
+  </div>
+</section>
+
+<section class="screen loading" id="load-face" data-auto="confirm" data-delay="2200">
+  <div><div class="spin"></div><b>Verificando sua foto</b></div>
+</section>
+
+<!-- ========== CONFIRMAÇÃO ========== -->
+<section class="screen" id="confirm">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Confirmação</div>
+  <div class="body">
+    <h1 style="font-size:18px;line-height:24px">Sua credencial vai ser criada com os dados do seu documento</h1>
+    <p style="font-size:15px;line-height:32px;margin-bottom:12px">Você vai poder compartilhar as seguintes informações:</p>
+    <div data-tpl="cred-current"></div>
+  </div>
+  <div class="foot"><button class="btn primary" data-act="finalizar">Finalizar</button></div>
+</section>
+
+<!-- ========== CREDENCIAL ========== -->
+<section class="screen" id="cred">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Credencial</div>
+  <div class="body" data-tpl="cred-view"></div>
+  <div class="foot"><button class="btn danger" data-act="revogar">Revogar documento</button><button class="btn primary" data-open="faceid">Usar credencial</button></div>
+  <div class="sheet-wrap" id="faceid">
+    <div class="sheet" style="position:relative;padding-top:28px">
+      <button class="x" data-close aria-label="Fechar"><svg width="24" height="24"><use href="#i-close"/></svg></button>
+      <svg class="face" style="margin:0;width:48px;height:48px"><use href="#i-face"/></svg>
+      <h2>Face ID</h2>
+      <p style="font-size:15px;line-height:32px">Para usar a credencial, você precisa verificar sua identidade por reconhecimento facial.</p>
+      <button class="btn soft" data-toast="Código de verificação não faz parte do protótipo">Inserir código</button>
+      <button class="btn primary" data-act="use-cred" data-go="scan" data-close>Validar</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== COMPARTILHAR ========== -->
+<section class="screen" id="scan">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Compartilhar</div>
+  <div class="body" style="display:flex;flex-direction:column;gap:16px">
+    <h1 style="font-size:18px;line-height:24px">Aponte a câmera para o código QR de autenticação</h1>
+    <button class="cam scan" style="width:100%" data-act="scan-read" aria-label="Simular leitura do QR"><video class="camv" playsinline muted autoplay></video><div class="cam-msg"></div><span style="position:absolute;left:0;right:0;bottom:12px;text-align:center;color:#ddd;font-size:12px;z-index:3;text-shadow:0 1px 3px #000">Toque na câmera para simular a leitura</span></button>
+  </div>
+</section>
+
+<section class="screen" id="share">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Compartilhar dados</div>
+  <div class="hero"><svg><use href="#i-share"/></svg></div>
+  <div class="body">
+    <h2 style="font-size:24px;line-height:30px;margin-bottom:8px">Você vai compartilhar seus dados com Loja Exemplo</h2>
+    <p style="font-size:15px;line-height:28px">O parceiro solicitou os seguintes dados:</p>
+    <div class="srows" id="share-list"></div>
+    <p class="note" id="share-used"></p>
+  </div>
+  <div class="foot"><button class="btn primary" data-go="shared">Compartilhar</button></div>
+</section>
+
+<section class="screen" id="shared">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Compartilhar dados</div>
+  <div class="hero green"><svg><use href="#i-check"/></svg></div>
+  <div class="body">
+    <h2 style="font-size:24px;margin-bottom:12px">Dados compartilhados</h2>
+    <div class="card"><div class="srows" id="shared-list"></div></div>
+    <p class="note" id="shared-used"></p>
+  </div>
+  <div class="foot"><button class="btn primary" data-go="home" data-reset-stack>Ir para a carteira</button></div>
+</section>
+
+<!-- ========== OPÇÕES ========== -->
+<section class="screen" id="opcoes">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Opções</div>
+  <div class="body flush">
+    <p style="padding:16px;font-size:15px;background:var(--bg)">Selecione o que você quer fazer</p>
+    <div class="menu">
+      <button data-toast="Proteções de uso não fazem parte do protótipo"><span class="ico-circle"><svg><use href="#i-key"/></svg></span><span>Ativar proteções de uso</span><svg class="chev"><use href="#i-chev"/></svg></button>
+      <button data-go="idioma"><span class="ico-circle"><svg><use href="#i-globe"/></svg></span><span>Idioma</span><svg class="chev"><use href="#i-chev"/></svg></button>
+      <button data-toast="uBu Wallet · protótipo navegável · powered by Valid"><span class="ico-circle"><svg><use href="#i-info"/></svg></span><span>Sobre</span><svg class="chev"><use href="#i-chev"/></svg></button>
+      <button data-go="terms"><span class="ico-circle"><svg><use href="#i-book"/></svg></span><span>Termos e condições de uso</span><svg class="chev"><use href="#i-chev"/></svg></button>
+    </div>
+    <div style="padding:24px 16px"><button class="btn danger" data-go="login" data-reset-stack style="border-color:#8a1c1c;color:var(--danger)"><svg><use href="#i-door"/></svg>Sair</button></div>
+  </div>
+  <div class="tabbar" data-tabs="opcoes"></div>
+</section>
+
+<section class="screen" id="idioma">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Idioma</div>
+  <div class="body flush">
+    <p style="padding:16px;font-size:15px">Selecione o idioma do sistema</p>
+    <div class="menu" id="langs">
+      <button data-lang="es"><span class="flag"><svg viewBox="0 0 22 16"><rect width="11" height="8" fill="#fff"/><rect x="11" width="11" height="8" fill="#d21034"/><rect y="8" width="11" height="8" fill="#005293"/><rect x="11" y="8" width="11" height="8" fill="#fff"/></svg></span><span>Espanhol</span><i class="toggle on"></i></button>
+      <button data-lang="en"><span class="flag"><svg viewBox="0 0 22 16"><rect width="22" height="16" fill="#fff"/><g fill="#b22234"><rect width="22" height="1.7"/><rect y="3.4" width="22" height="1.7"/><rect y="6.8" width="22" height="1.7"/><rect y="10.2" width="22" height="1.7"/><rect y="13.6" width="22" height="2.4"/></g><rect width="10" height="8.6" fill="#3c3b6e"/></svg></span><span>Inglês</span><i class="toggle"></i></button>
+      <button data-lang="pt"><span class="flag"><svg viewBox="0 0 22 16"><rect width="22" height="16" fill="#009b3a"/><path d="M11 2 20 8 11 14 2 8z" fill="#fedf00"/><circle cx="11" cy="8" r="3.2" fill="#002776"/></svg></span><span>Português</span><i class="toggle"></i></button>
+    </div>
+  </div>
+  <div class="foot"><button class="btn primary" data-act="save-lang">Salvar</button></div>
+</section>
+
+<div class="toast" id="toast"></div>
+</div>
+<div class="homebar"></div>
+</div>
+</main>
+<footer class="sitefoot"><span>©&nbsp;<span id="yr">2026</span>&nbsp;Valid. Todos os direitos reservados. Protótipo confidencial, uso restrito e proibida a reprodução.</span></footer>
+<script src="protect.js"></script>
+<script src="i18n.js"></script>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
+  var state={passaporte:false,dados:false,tipo:'passaporte'};
+  var stack=['splash'], timer=null;
+
+  var ICON=function(n){return '<svg width="24" height="24"><use href="#i-'+n+'"/></svg>'};
+
+  /* Templates de credencial */
+  /* ===== Câmera do dispositivo (foto do documento, foto do rosto e leitura de QR) ===== */
+  var CAMS={'cam-doc':'environment','cam-face':'user','scan':'environment'};
+  var camStream=null,camTimer=null;
+  function stopCam(){
+    clearInterval(camTimer);camTimer=null;
+    if(camStream){camStream.getTracks().forEach(function(t){t.stop()});camStream=null}
+    $$('.camv').forEach(function(v){v.srcObject=null});
+  }
+  function armAuto(el){
+    var a=el.getAttribute('data-auto');
+    if(a)timer=setTimeout(function(){if(el.classList.contains('active'))go(a)},+el.getAttribute('data-delay')||2000);
+  }
+  function startCam(id,el){
+    var mode=CAMS[id],v=$('.camv',el),msg=$('.cam-msg',el);
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.textContent='Câmera indisponível. Você pode continuar com a simulação.';armAuto(el);return}
+    msg.textContent='Permita o acesso à câmera para continuar.';
+    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:mode}},audio:false}).then(function(st){
+      if(!el.classList.contains('active')){st.getTracks().forEach(function(t){t.stop()});return}
+      camStream=st;v.classList.toggle('mirror',mode==='user');v.srcObject=st;
+      var pl=v.play&&v.play();if(pl&&pl.catch)pl.catch(function(){});
+      msg.textContent='';armAuto(el);
+      if(id==='scan'&&window.BarcodeDetector){
+        var bd=new BarcodeDetector({formats:['qr_code']});
+        camTimer=setInterval(function(){bd.detect(v).then(function(c){if(c.length&&el.classList.contains('active')){clearInterval(camTimer);$('[data-act="scan-read"]',el).click()}}).catch(function(){})},500);
+      }
+    }).catch(function(){
+      if(!el.classList.contains('active'))return;
+      msg.textContent='Câmera indisponível. Você pode continuar com a simulação.';armAuto(el);
+    });
+  }
+
+  /* ===== Compartilhamento: só vai o que a credencial usada realmente contém ===== */
+  var SHARE_ITEMS=[['name','Nome e sobrenome'],['birth','Data de nascimento'],['valid','Data de validade'],['mail','E-mail'],['age','Conferência de maioridade']];
+  var SHARE_AVAIL={passaporte:['name','birth','valid','age'],dados:['name','valid','mail']};
+  function usedCred(){
+    if(state.use&&state[state.use])return state.use;
+    return state.passaporte?'passaporte':state.dados?'dados':null;
+  }
+  function shareValue(k,cred){
+    if(k==='name')return cred==='passaporte'?passData().name:ddData().name;
+    if(k==='valid')return cred==='passaporte'?passData().expires:ddData().expires;
+    if(k==='mail')return ddData().email;
+    if(k==='birth')return passData().birthDate;
+    if(k==='age')return isAdult(passData().birthDate)?'Maior de idade':'Menor de idade';
+    return '';
+  }
+  function renderShare(){
+    var c=usedCred(),av=SHARE_AVAIL[c]||[];
+    var rows=SHARE_ITEMS.map(function(it){
+      var ok=av.indexOf(it[0])>-1;
+      return '<div class="srow'+(ok?'':' na')+'"><span class="l">'+it[1]+'</span><span class="v">'+(ok?esc(shareValue(it[0],c)):'Não disponível nesta credencial')+'</span></div>';
+    }).join('');
+    $('#share-list').innerHTML=rows;
+    var shared=SHARE_ITEMS.filter(function(it){return av.indexOf(it[0])>-1}).map(function(it){
+      return '<div class="srow"><span class="l">'+it[1]+'</span><span class="v">'+esc(shareValue(it[0],c))+'</span></div>';
+    }).join('');
+    $('#shared-list').innerHTML=shared;
+    var label=c==='passaporte'?'Passaporte':'Credencial de dados';
+    $('#share-used').innerHTML='<span>Credencial usada:</span> <b>'+label+'</b>. <span>Só são enviados os dados que existem nela.</span>';
+    $('#shared-used').innerHTML='<span>Credencial usada:</span> <b>'+label+'</b>';
+  }
+  /* ===== Perfil do usuário: vem da conta usada no login e alimenta todas as telas ===== */
+  var PERSONA={name:'Maria Fernanda da Silva',email:'maria.silva@gmail.com',phone:'(+507) 1243 - 5678',birth:'15/03/1990'};
+  function U(){return state.user||PERSONA}
+  function setUser(u){state.user=u;state.dd=null;state.pass=null;state.passaporte=false;state.dados=false}
+  var words=function(n){return n.trim().split(/\s+/)};
+  var firstName=function(n){return words(n)[0]};
+  var shortName=function(n){var w=words(n);return w.length>1?w[0]+' '+w[w.length-1]:w[0]};
+  var initials=function(n){var w=words(n);return (w[0][0]+(w.length>1?w[w.length-1][0]:'')).toUpperCase()};
+  var hasPhoto=function(){return U().name.trim().toLowerCase()===PERSONA.name.toLowerCase()};
+  var pad2=function(n){return ('0'+n).slice(-2)};
+  var dmy=function(d){return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear()};
+  var T0=new Date();
+  function isAdult(b){var x=b.split('/'),d=new Date(+x[2]+18,+x[1]-1,+x[0]);return d<=T0}
+  function passDates(){var i=new Date(T0.getFullYear()-1,T0.getMonth(),T0.getDate()),e=new Date(i.getFullYear()+10,i.getMonth(),i.getDate()-1);return {issued:dmy(i),expires:dmy(e)}}
+  function ddDates(){return {issued:dmy(T0),expires:dmy(new Date(T0.getFullYear()+1,T0.getMonth(),T0.getDate()))}}
+  var esc=function(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  function passData(){var d=passDates();return state.pass||{name:U().name,num:'YB123456',country:'Brasil',issued:d.issued,expires:d.expires,birthDate:PERSONA.birth,sex:'Feminino',birth:'São Paulo',p1:'Maria do Carmo da Silva',p2:'José Carlos da Silva'}}
+  function ddData(){var d=ddDates();return state.dd||{name:U().name,email:U().email,phone:U().phone,issued:d.issued,expires:d.expires}}
+  function mrz(P){
+    var n=words(P.name.normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase());
+    var l1=('P<BRA'+n[n.length-1]+'<<'+n.slice(0,-1).filter(function(w){return ['DA','DE','DO','DAS','DOS'].indexOf(w)<0}).join('<')).padEnd(44,'<').slice(0,44);
+    var x=P.expires.split('/'),exp=x[2].slice(2)+x[1]+x[0];
+    var l2=(P.num.toUpperCase()+'<<<<<<<<<').slice(0,9)+'0BRA'+P.birthDate.split('/')[2].slice(2)+P.birthDate.split('/')[1]+P.birthDate.split('/')[0]+'4F'+exp+'0<<<<<<<<<<<<<<00';
+    return l1+'\n'+l2.padEnd(44,'<').slice(0,44);
+  }
+  function photoHtml(){return hasPhoto()?'<img class="photo" src="assets/foto.png" alt="Foto do titular">':'<div class="photo initials" role="img" aria-label="Foto do titular">'+esc(initials(U().name))+'</div>'}
+  function credPassaporte(){
+    var P=passData(), manual=!!state.pass;
+    return '<div class="cred"><div class="cred-head">'+ICON('passport')+'Passaporte</div><div class="in">'+photoHtml()+
+    '<dl><dt>Nome</dt><dd>'+esc(P.name)+'</dd></dl>'+
+    '<dl class="grid"><div><dt>Número</dt><dd>'+esc(P.num)+'</dd></div><div><dt>País emissor</dt><dd>'+esc(P.country)+'</dd></div>'+
+    '<div><dt>Data de emissão</dt><dd>'+esc(P.issued)+'</dd></div><div><dt>Data de validade</dt><dd>'+esc(P.expires)+'</dd></div>'+
+    '<div><dt>Data de nascimento</dt><dd>'+esc(P.birthDate)+'</dd></div><div><dt>Sexo</dt><dd>'+esc(P.sex)+'</dd></div>'+
+    '<div style="grid-column:1/-1"><dt>Naturalidade</dt><dd>'+esc(P.birth)+'</dd></div>'+
+    '<div><dt>Filiação 1</dt><dd>'+esc(P.p1)+'</dd></div><div><dt>Filiação 2</dt><dd>'+esc(P.p2||'-')+'</dd></div></dl>'+
+    '<div class="mrz" style="white-space:pre-wrap">'+esc(mrz(P))+'</div></div></div>'}
+  function credDados(){
+    var D=ddData();
+    return '<div class="cred"><div class="cred-head">'+ICON('badge')+'Dados pessoais</div><div class="in">'+
+    '<dl><dt>Nome</dt><dd>'+esc(D.name)+'</dd></dl>'+
+    '<dl class="grid"><div><dt>Data de emissão</dt><dd>'+esc(D.issued)+'</dd></div><div><dt>Data de validade</dt><dd>'+esc(D.expires)+'</dd></div>'+
+    '<div><dt>E-mail</dt><dd>'+esc(D.email)+'</dd></div><div><dt>Telefone</dt><dd>'+esc(D.phone)+'</dd></div></dl></div></div>'}
+  var view='passaporte';
+
+  function renderTemplates(){
+    $('[data-tpl="cred-current"]').innerHTML = state.tipo==='dados'?credDados():credPassaporte();
+    $('[data-tpl="cred-view"]').innerHTML = view==='dados'?credDados():credPassaporte();
+  }
+
+  function renderHome(){
+    var h='<h1 style="margin-top:8px">Minha carteira</h1><p style="margin:8px 0 16px">'+
+      (state.passaporte||state.dados?'Adicione suas credenciais para compartilhar seus dados':'Adicione credenciais para compartilhar seus dados de forma segura.')+'</p>';
+    if(!state.passaporte&&!state.dados){
+      h+='<div class="empty"><div class="row"><span class="ico-circle" style="color:#222">'+ICON('box')+'</span><div><b>Sua carteira está vazia</b><small>Adicione uma credencial para acessar.</small></div></div>'+
+         '<button class="btn soft" data-go="tipo">'+ICON('plus')+'Adicionar credencial</button></div>';
+    }else{
+      if(state.passaporte)h+=walletCard('passaporte','Passaporte','passport');
+      if(state.dados)h+=walletCard('dados','Credencial de dados','badge');
+      h+='<button class="btn soft" data-go="tipo">'+ICON('plus')+'Adicionar credencial</button>';
+    }
+    $('#home-body').innerHTML=h;
+    $('#u-first').textContent=firstName(U().name);
+  }
+  function walletCard(k,t,i){var exp=k==='passaporte'?passData().expires:ddData().expires;return '<button class="wallet-card" data-go="cred" data-view="'+k+'"><span class="ico-circle">'+ICON(i)+'</span><span class="txt"><small>'+t+'</small><strong>'+esc(shortName(U().name))+'</strong><small><span>Validade:</span> '+esc(exp)+'</small></span><svg class="chev"><use href="#i-chev"/></svg></button>'}
+
+  /* Abas inferiores */
+  function renderTabs(){
+    $$('.tabbar').forEach(function(t){
+      var on=t.getAttribute('data-tabs');
+      var defs=[['home','Carteira','wallet'],['scan','Compartilhar','qr'],['opcoes','Opções','gear']];
+      t.innerHTML=defs.map(function(d){return '<button class="'+(d[0]===on?'on':'')+'" data-tab="'+d[0]+'">'+ICON(d[2])+d[1]+'</button>'}).join('');
+    });
+  }
+
+  /* Navegação */
+  function show(id,push){
+    clearTimeout(timer);stopCam();
+    $$('.screen').forEach(function(s){s.classList.remove('active')});
+    var el=$('#'+id); el.classList.add('active');
+    $('#sb').className='sb '+(/^(splash|login|login-email|signup|welcome|home)$/.test(id)?'dark':'light');
+    $$('.sheet-wrap.open').forEach(function(s){s.classList.remove('open')});
+    if(id==='idioma')syncLangToggles();
+    if(id==='share'||id==='shared')renderShare();
+    if(id==='rosto-intro'){var rl=$('#rosto-lead');if(rl)rl.style.display=state.tipo==='dados'?'':'none'}
+    if(id==='home')renderHome();
+    if(id==='confirm'||id==='cred')renderTemplates();
+    var b=$('.body',el); if(b)b.scrollTop=0;
+    if(CAMS[id])startCam(id,el);else armAuto(el);
+  }
+  function go(id,opts){
+    opts=opts||{};
+    if(opts.reset||id==='welcome')stack=[];
+    if(stack[stack.length-1]!==id)stack.push(id);
+    show(id);
+  }
+  function back(){
+    if(stack.length>1)stack.pop();
+    var id=stack[stack.length-1];
+    /* telas automáticas (loading/câmera) não devem ser revisitadas ao voltar */
+    while(stack.length>1&&/^(load-|nfc$|cam-)/.test(id)){stack.pop();id=stack[stack.length-1]}
+    show(id);
+  }
+  var toastT;
+  function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2200)}
+
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('[data-go],[data-back],[data-tab],[data-act],[data-open],[data-close],[data-toast],[data-lang]');
+    if(!el)return;
+    if(el.hasAttribute('data-set')){var kv=el.getAttribute('data-set').split('=');state[kv[0]]=kv[1]}
+    if(el.hasAttribute('data-view'))view=el.getAttribute('data-view');
+    if(el.hasAttribute('data-close'))$$('.sheet-wrap.open').forEach(function(s){s.classList.remove('open')});
+    if(el.hasAttribute('data-open')){$('#'+el.getAttribute('data-open')).classList.add('open');return}
+    if(el.hasAttribute('data-toast'))toast(el.getAttribute('data-toast'));
+    var act=el.getAttribute('data-act');
+    if(act==='toggle-pwd'){var p=$('input',el.parentNode);p.type=p.type==='password'?'text':'password';el.textContent=p.type==='password'?'Mostrar':'Ocultar';return}
+    if(act==='clear-field'){var ci=$('input',el.parentNode);ci.value='';el.parentNode.classList.remove('has');ci.focus();return}
+    if(act==='login-submit'){var fs=$$('#login-email input');if(!fs[0].value.trim()||!fs[1].value){toast('Informe o e-mail e a senha para continuar');return}setUser({name:PERSONA.name,email:fs[0].value.trim(),phone:PERSONA.phone});go('load-wallet');return}
+    if(act==='toggle-check'){var ck=$('#terms-check');var on=ck.classList.toggle('on');ck.setAttribute('aria-checked',on);return}
+    if(act==='pick-acct'||act==='pick-mail'){$$('.acct',el.parentNode).forEach(function(a){a.classList.remove('sel')});el.classList.add('sel');return}
+    if(act==='save-lang'){var on=$('#langs .toggle.on');if(on)setLang(on.parentNode.getAttribute('data-lang'));toast('Idioma salvo');back();return}
+    if(act==='google-continue'){var ga=$('#accts .acct.sel');setUser({name:ga.getAttribute('data-name'),email:ga.getAttribute('data-email'),phone:PERSONA.phone})}
+    if(act==='apple-continue'){var an=$('#social-apple input').value.trim()||PERSONA.name,am=$('#mailopts .acct.sel');setUser({name:an,email:am.getAttribute('data-email'),phone:PERSONA.phone})}
+    if(act==='use-cred'){state.use=view}
+    if(act==='scan-read'){if(!usedCred()){toast('Adicione uma credencial para compartilhar seus dados.');return}go('share');return}
+    if(act==='doc-photo'){state.pass=null;state.tipo='passaporte'}
+    if(act==='fill-social'){
+      var fv=function(id,v){var f=$('#'+id),e=$('input',f);e.value=v;f.classList.add('has','filled');f.classList.remove('bad');$('[data-err="'+id+'"]').classList.remove('on')};
+      fv('dd-name',U().name);fv('dd-mail',U().email);fv('dd-phone',U().phone);
+      return
+    }
+    if(act==='dados-submit'){
+      var dv=function(id){return $('#'+id+' input').value.trim()};
+      var dbad={'dd-name':dv('dd-name').split(/\s+/).length<2||dv('dd-name').length<5,
+        'dd-mail':!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(dv('dd-mail')),
+        'dd-phone':dv('dd-phone').replace(/\D/g,'').length<8};
+      var dany=false,dfirst=null;
+      Object.keys(dbad).forEach(function(id){
+        $('[data-err="'+id+'"]').classList.toggle('on',dbad[id]);$('#'+id).classList.toggle('bad',dbad[id]);
+        if(dbad[id]){dany=true;if(!dfirst)dfirst=$('#'+id)}
+      });
+      if(dany){dfirst.scrollIntoView({block:'center'});toast('Revise os campos destacados');return}
+      var dd0=ddDates();
+      state.dd={name:dv('dd-name'),email:dv('dd-mail'),phone:dv('dd-phone'),issued:dd0.issued,expires:dd0.expires};
+      state.tipo='dados';
+      go('rosto-intro');return
+    }
+    if(act==='signup-submit'){
+      var v=function(id){return $('#'+id+' input').value};
+      var bad={name:v('f-name').trim().split(/\s+/).length<2||v('f-name').trim().length<5,mail:!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('f-mail').trim()),pwd:v('f-pwd').length<8,pwd2:v('f-pwd2')!==v('f-pwd')||!v('f-pwd2'),terms:!$('#terms-check').classList.contains('on')};
+      var map={name:'f-name',mail:'f-mail',pwd:'f-pwd',pwd2:'f-pwd2'},any=false;
+      Object.keys(bad).forEach(function(k){
+        $('[data-err="'+k+'"]').classList.toggle('on',bad[k]);
+        if(map[k])$('#'+map[k]).classList.toggle('bad',bad[k]);
+        if(bad[k])any=true;
+      });
+      if(any){toast('Revise os campos destacados');return}
+      setUser({name:v('f-name').trim(),email:v('f-mail').trim(),phone:PERSONA.phone});
+      go('load-wallet');return
+    }
+    if(act==='reset-wallet'){state.passaporte=false;state.dados=false}
+    if(act==='finalizar'){state[state.tipo==='dados'?'dados':'passaporte']=true;go('home',{reset:true});toast('Credencial criada com sucesso');return}
+    if(act==='revogar'){state[view]=false;if(state.use===view)state.use=null;toast('Credencial revogada');go('home',{reset:true});return}
+    if(el.hasAttribute('data-lang')){$$('#langs .toggle').forEach(function(t){t.classList.remove('on')});$('.toggle',el).classList.add('on');return}
+    if(el.hasAttribute('data-tab')){go(el.getAttribute('data-tab'),{reset:true});stack.unshift('home');if(stack[0]===stack[1])stack.shift();return}
+    if(el.hasAttribute('data-back')){back();return}
+    if(el.hasAttribute('data-go'))go(el.getAttribute('data-go'),{reset:el.hasAttribute('data-reset-stack')});
+  });
+
+  /* ===== Idioma (padrão: inglês) ===== */
+  var LANG='en', DICT={};
+  (window.I18N||[]).forEach(function(r){DICT[r[0].replace(/\s+/g,' ')]={en:r[1],es:r[2]}});
+  var ATTR_SEL='[placeholder],[aria-label],[alt],[data-toast]', ATTRS=['placeholder','aria-label','alt','data-toast'];
+  var langObs=null;
+  function tr(k){var d=DICT[k];return LANG==='pt'||!d?k:(d[LANG]||k)}
+  function applyLang(){
+    if(langObs)langObs.disconnect();
+    var tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),n,nodes=[];
+    while((n=tw.nextNode()))nodes.push(n);
+    nodes.forEach(function(n){
+      var p=n.parentNode;if(!p||(p.closest&&p.closest('svg,script,style,#log')))return;
+      var cur=n.nodeValue, src=(n.__s!==undefined&&n.__c===cur)?n.__s:cur;
+      var m=/^(\s*)([\s\S]*?)(\s*)$/.exec(src);if(!m[2])return;
+      var key=m[2].replace(/\s+/g,' ');if(!DICT[key])return;
+      var out=m[1]+tr(key)+m[3];
+      n.__s=src;n.__c=out;if(cur!==out)n.nodeValue=out;
+    });
+    $$(ATTR_SEL).forEach(function(el){
+      ATTRS.forEach(function(a){
+        var cur=el.getAttribute(a);if(cur===null)return;
+        var sk='__s_'+a,ck='__c_'+a,src=(el[sk]!==undefined&&el[ck]===cur)?el[sk]:cur;
+        var key=src.trim().replace(/\s+/g,' ');if(!DICT[key])return;
+        var out=tr(key);el[sk]=src;el[ck]=out;if(cur!==out)el.setAttribute(a,out);
+      });
+    });
+    document.documentElement.lang={pt:'pt-BR',en:'en',es:'es'}[LANG];
+    if(!langObs)langObs=new MutationObserver(function(){applyLang()});
+    langObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTRS});
+  }
+  function syncLangToggles(){$$('#langs button').forEach(function(b){$('.toggle',b).classList.toggle('on',b.getAttribute('data-lang')===LANG)})}
+  function setLang(l){
+    LANG=l;
+    $$('[data-uilang]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-uilang')===l)});
+    syncLangToggles();applyLang();
+  }
+  $$('[data-uilang]').forEach(function(b){b.addEventListener('click',function(){setLang(b.getAttribute('data-uilang'))})});
+
+  /* ===== Barra de ferramentas: fluxos, visualização e reinício ===== */
+  var FLOWS=[
+    {n:'Onboarding e login',d:'Splash, login e boas-vindas',id:'splash'},
+    {n:'Login por e-mail',d:'E-mail e senha',id:'login-email'},
+    {n:'Cadastro',d:'Criar conta com validação de campos',id:'signup'},
+    {n:'Login com Google',d:'Escolha de conta e permissões',id:'social-google'},
+    {n:'Login com Apple',d:'Nome, e-mail e Face ID',id:'social-apple'},
+    {n:'Criar credencial: dados manuais',d:'Auto declaração de dados',id:'dados-form',tipo:'dados'},
+    {n:'Carteira vazia',d:'Início sem credenciais',id:'home'},
+    {n:'Criar credencial',d:'Tipo, documento, rosto e confirmação',id:'tipo'},
+    {n:'Usar credencial',d:'Carteira, detalhe e Face ID',id:'cred',w:1},
+    {n:'Compartilhar dados',d:'QR, consentimento e confirmação',id:'scan',w:1},
+    {n:'Opções e idioma',d:'Menu de opções, idioma e termos',id:'opcoes',w:1}
+  ];
+  var fm=$('#flowMenu');
+  fm.innerHTML=FLOWS.map(function(f,i){return '<button role="menuitem" data-flow="'+i+'">'+f.n+'<small>'+f.d+'</small></button>'}).join('');
+  function closeFlows(){fm.classList.remove('open');$('#flowBtn').setAttribute('aria-expanded','false')}
+  $('#flowBtn').addEventListener('click',function(e){e.stopPropagation();var o=fm.classList.toggle('open');this.setAttribute('aria-expanded',o)});
+  document.addEventListener('click',function(e){if(!e.target.closest('.menu-wrap'))closeFlows()});
+  fm.addEventListener('click',function(e){
+    var b=e.target.closest('[data-flow]');if(!b)return;
+    var f=FLOWS[+b.getAttribute('data-flow')];
+    state.user=null;state.dd=null;state.pass=null;state.use=null;state.passaporte=state.dados=!!f.w;state.tipo=f.tipo||'passaporte';view='passaporte';
+    stack=f.id==='splash'?['splash']:/^(login-email|signup|social-google|social-apple)$/.test(f.id)?['login',f.id]:f.id==='home'?['home']:f.id==='tipo'?['home','tipo']:f.id==='dados-form'?['home','tipo','dados-form']:f.id==='confirm'?['home','tipo','confirm']:['home',f.id];
+    closeFlows();show(f.id);
+  });
+  $('#restartBtn').addEventListener('click',function(){
+    try{history.replaceState(null,'',location.pathname)}catch(_){}
+    location.reload();
+  });
+
+  var body=document.body, dev=$('#device'), stage=$('#stage');
+  function savedMode(){
+    var q=/[?&]view=(web|phone)/.exec(location.search);if(q)return q[1];
+    try{return localStorage.getItem('ubu-view')}catch(_){return null}
+  }
+  function setMode(m,persist){
+    if(window.innerWidth<=600)m='web';
+    body.classList.toggle('web',m==='web');body.classList.toggle('phone',m!=='web');
+    $('#vPhone').classList.toggle('on',m!=='web');$('#vWeb').classList.toggle('on',m==='web');
+    if(persist){try{localStorage.setItem('ubu-view',m)}catch(_){}}
+    fit();
+  }
+  function fit(){
+    if(body.classList.contains('web')){dev.style.transform='';return}
+    var s=Math.min(1,(stage.clientHeight-24)/808,(stage.clientWidth-24)/388);
+    dev.style.transform='scale('+s+')';
+  }
+  $('#vPhone').addEventListener('click',function(){setMode('phone',true)});
+  $('#vWeb').addEventListener('click',function(){setMode('web',true)});
+  window.addEventListener('resize',function(){setMode(savedMode()||'phone')});
+  $('#yr').textContent=new Date().getFullYear();
+  setMode(savedMode()||'phone');
+
+  document.addEventListener('input',function(e){
+    if(e.target.getAttribute&&e.target.getAttribute('data-mask')==='date'){var d=e.target.value.replace(/\D/g,'').slice(0,8);e.target.value=d.length>4?d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4):d.length>2?d.slice(0,2)+'/'+d.slice(2):d}
+    var f=e.target.closest&&e.target.closest('.field');if(!f)return;
+    f.classList.toggle('has',!!e.target.value);f.classList.remove('bad');
+    var er=f.nextElementSibling;if(er&&er.classList.contains('err'))er.classList.remove('on');
+  });
+  renderTabs();
+  var start=location.hash.slice(1);
+  if(start&&$('#'+start)){state.passaporte=state.dados=/^(cred|scan|share|shared|opcoes|idioma)$/.test(start);stack=['home',start];show(start)}
+  else show('splash');
+  var ql=/[?&]lang=(pt|en|es)/.exec(location.search);
+  setLang(ql?ql[1]:'en');
+})();
+</script>
+</body>
+</html>
