@@ -799,7 +799,12 @@ p{font-size:14px;line-height:24px}
   }
   function armAuto(el){
     var a=el.getAttribute('data-auto');
-    if(a)timer=setTimeout(function(){if(el.classList.contains('active'))go(a)},+el.getAttribute('data-delay')||2000);
+    if(el.id==='load-face'&&state.tipo==='evento')a='invite-done';   /* convite: depois da foto do rosto a credencial é criada */
+    if(a)timer=setTimeout(function(){
+      if(!el.classList.contains('active'))return;
+      if(a==='invite-done'){state.evento=true;go('home',{reset:true});toast('Credencial criada e adicionada na carteira!');return}
+      go(a);
+    },+el.getAttribute('data-delay')||2000);
   }
   function startCam(id,el){
     var mode=CAMS[id],v=$('.camv',el),msg=$('.cam-msg',el);
@@ -1008,7 +1013,7 @@ p{font-size:14px;line-height:24px}
     if(act==='apple-continue'){var an=$('#social-apple input').value.trim()||PERSONA.name,am=$('#mailopts .acct.sel');setUser({name:an,email:am.getAttribute('data-email'),phone:PERSONA.phone})}
     if(act==='use-cred'){state.use=view}
     if(act==='invite-read'){go('invite-confirm');return}
-    if(act==='invite-finish'){state.evento=true;go('home',{reset:true});toast('Credencial criada e adicionada na carteira!');return}
+    if(act==='invite-finish'){state.tipo='evento';go('rosto-intro');return}
     if(act==='scan-read'){if(!usedCred()){go('no-creds');return}go('share');return}
     if(act==='doc-photo'){state.pass=null;state.tipo='passaporte'}
     if(act==='fill-social'){
