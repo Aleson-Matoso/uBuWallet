@@ -70,14 +70,7 @@
   window.addEventListener('beforeprint',function(){cover('print',true,'Impressão bloqueada')});
   window.addEventListener('afterprint',function(){cover('print',false)});
 
-  /* 5. Esconde o conteúdo quando a janela perde foco ou a aba fica oculta
-        (alternador de apps, ferramentas de captura, painel do inspetor) */
-  window.addEventListener('blur',function(){cover('blur',true,'Conteúdo protegido')});
-  window.addEventListener('focus',function(){cover('blur',false)});
-  doc.addEventListener('visibilitychange',function(){cover('hidden',doc.hidden,'Conteúdo protegido')});
-  window.addEventListener('pagehide',function(){cover('hidden',true)});
-  window.addEventListener('pageshow',function(){cover('hidden',false)});
-  if(!doc.hasFocus())cover('blur',true);
+  /* 5. (removido) Antes a tela era escondida ao perder o foco ou trocar de aba. */
 
   /* 6. Detecção de DevTools (janela acoplada e pausa por debugger) */
   var devOpen=false;
