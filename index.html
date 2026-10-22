@@ -903,7 +903,7 @@ p{font-size:14px;line-height:24px}
     '<dl><dt>Obs.:</dt><dd>'+esc(E.obs)+'</dd></dl></div></div>'}
   function credQr(kind){
     var head=kind==='evento'?evHead():kind==='dados'?'<div class="cred-head">'+ICON('badge')+'Dados pessoais</div>':'<div class="cred-head">'+ICON('passport')+'Passaporte</div>';
-    return '<div class="qr-card">'+head+'<div class="in"><img class="qr" src="assets/qrcode.png" alt="QR code da credencial"></div></div>'}
+    return '<div class="qr-card">'+head+'<div class="in"><img class="qr" src="assets/qrcode.png" width="218" height="224" alt="QR code da credencial"></div></div>'}
   function credPager(kind){
     var card=kind==='evento'?credEvento():kind==='dados'?credDados():credPassaporte();
     return '<div class="pager"><div class="pages" id="cred-pages"><div class="pg">'+card+'</div><div class="pg">'+credQr(kind)+'</div></div>'+
@@ -1199,6 +1199,7 @@ p{font-size:14px;line-height:24px}
       var i=Math.round(drag.left/w);if(dx<-40)i=1;else if(dx>40)i=0;
       p.scrollTo({left:i*w});drag=null;
     }
+    document.addEventListener('load',function(e){if(e.target&&e.target.classList&&e.target.classList.contains('qr'))fitPager()},true);
     document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
     document.addEventListener('click',function(e){
       var b=e.target.closest&&e.target.closest('#cred-dots button');if(!b)return;
