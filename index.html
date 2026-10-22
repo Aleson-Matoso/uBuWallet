@@ -1006,7 +1006,7 @@ p{font-size:14px;line-height:24px}
     if(act==='save-lang'){var on=$('#langs .toggle.on');if(on)setLang(on.parentNode.getAttribute('data-lang'));toast('Idioma salvo');back();return}
     if(act==='google-continue'){var ga=$('#accts .acct.sel');setUser({name:ga.getAttribute('data-name'),email:ga.getAttribute('data-email'),phone:PERSONA.phone})}
     if(act==='apple-continue'){var an=$('#social-apple input').value.trim()||PERSONA.name,am=$('#mailopts .acct.sel');setUser({name:an,email:am.getAttribute('data-email'),phone:PERSONA.phone})}
-    if(act==='use-cred'){state.use=view;if(view==='evento'){$$('.sheet-wrap.open').forEach(function(sw){sw.classList.remove('open')});showQr();return}}
+    if(act==='use-cred'){state.use=view}
     if(act==='invite-read'){go('invite-confirm');return}
     if(act==='invite-finish'){state.evento=true;go('home',{reset:true});toast('Credencial criada e adicionada na carteira!');return}
     if(act==='scan-read'){if(!usedCred()){go('no-creds');return}go('share');return}
