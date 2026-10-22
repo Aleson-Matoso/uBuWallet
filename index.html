@@ -147,7 +147,7 @@ body.web .sheet{max-width:640px;margin:0 auto}
 .dots button.on{width:24px;background:var(--primary-mid)}
 .qr-card{background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .qr-card .in{padding:20px;display:flex;align-items:center;justify-content:center}
-.qr-card .qr{width:min(100%,260px);aspect-ratio:1;display:block;image-rendering:crisp-edges}
+.qr-card .qr{width:min(100%,218px);height:auto;display:block;image-rendering:pixelated}
 .cred-head.ev{background:linear-gradient(90deg,#3f4797,#5663d9)}
 .cred-head .cred-ico,.ico-circle.ev .cred-ico{width:22px;height:22px;object-fit:contain}
 .ico-circle.ev{background:#5663d9}
@@ -903,7 +903,7 @@ p{font-size:14px;line-height:24px}
     '<dl><dt>Obs.:</dt><dd>'+esc(E.obs)+'</dd></dl></div></div>'}
   function credQr(kind){
     var head=kind==='evento'?evHead():kind==='dados'?'<div class="cred-head">'+ICON('badge')+'Dados pessoais</div>':'<div class="cred-head">'+ICON('passport')+'Passaporte</div>';
-    return '<div class="qr-card">'+head+'<div class="in"><img class="qr" src="assets/qr-'+kind+'.svg" alt="QR code da credencial"></div></div>'}
+    return '<div class="qr-card">'+head+'<div class="in"><img class="qr" src="assets/qrcode.png" alt="QR code da credencial"></div></div>'}
   function credPager(kind){
     var card=kind==='evento'?credEvento():kind==='dados'?credDados():credPassaporte();
     return '<div class="pager"><div class="pages" id="cred-pages"><div class="pg">'+card+'</div><div class="pg">'+credQr(kind)+'</div></div>'+
