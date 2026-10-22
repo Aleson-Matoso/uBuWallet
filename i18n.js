@@ -207,6 +207,8 @@ window.I18N=[
 ['Menor de idade','Under 18','Menor de edad'],
 ['Permita o acesso à câmera para continuar.','Allow camera access to continue.','Permite el acceso a la cámara para continuar.'],
 ['Câmera indisponível. Você pode continuar com a simulação.','Camera unavailable. You can continue with the simulation.','Cámara no disponible. Puedes continuar con la simulación.'],
+['A data de nascimento não pode ser no futuro.','The date of birth cannot be in the future.','La fecha de nacimiento no puede ser futura.'],
+['Criar credencial: passaporte manual','Create credential: manual passport','Crear credencial: pasaporte manual'],
 ['Credencial usada:','Credential used:','Credencial usada:'],
 ['Só são enviados os dados que existem nela.','Only the data it contains is sent.','Solo se envían los datos que contiene.'],
 ['Adicione uma credencial para compartilhar seus dados.','Add a credential to share your data.','Agrega una credencial para compartir tus datos.'],

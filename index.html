@@ -215,7 +215,15 @@ p{font-size:14px;line-height:24px}
 .cam.scan::after{content:"";position:absolute;left:12%;right:12%;height:2px;background:#6c74ff;box-shadow:0 0 12px #6c74ff;top:10%;animation:scan 2.2s ease-in-out infinite alternate}
 @keyframes scan{to{top:88%}}
 .nfc{background:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;height:336px;margin-top:20px}
-.nfc svg{width:192px;height:192px}
+.nfc{position:relative;overflow:hidden}
+.nfc svg{width:192px;height:192px;position:relative;z-index:1}
+.nfc svg circle:last-child{transform-origin:96px 96px;animation:corepulse 1.6s ease-in-out infinite}
+.nfc .wave{position:absolute;left:50%;top:50%;width:192px;height:192px;margin:-96px 0 0 -96px;border:3px solid #111;border-radius:50%;opacity:0;animation:ripple 2.7s cubic-bezier(.2,.6,.3,1) infinite}
+.nfc .wave.w2{animation-delay:.9s}
+.nfc .wave.w3{animation-delay:1.8s}
+@keyframes ripple{0%{transform:scale(.45);opacity:.65}100%{transform:scale(1.6);opacity:0}}
+@keyframes corepulse{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
+@media(prefers-reduced-motion:reduce){.nfc .wave,.nfc svg circle:last-child{animation:none}.nfc .wave{opacity:.25}}
 .center-t{text-align:center}
 
 /* Loading */
@@ -516,7 +524,7 @@ p{font-size:14px;line-height:24px}
       <li style="line-height:32px">Esteja em um lugar com boa iluminação para que os dados fiquem nítidos e legíveis.</li>
     </ul>
   </div>
-  <div class="foot" style="gap:16px"><button class="btn soft" data-go="dados-form" data-set="tipo=dados">Informar dados manualmente</button><button class="btn primary" data-go="cam-doc" data-act="doc-photo">Tirar foto documento</button></div>
+  <div class="foot" style="gap:16px"><button class="btn soft" data-go="manual-pass" data-set="tipo=passaporte">Informar dados manualmente</button><button class="btn primary" data-go="cam-doc" data-act="doc-photo">Tirar foto documento</button></div>
 </section>
 
 <section class="screen" id="dados-form">
@@ -534,20 +542,44 @@ p{font-size:14px;line-height:24px}
   <div class="foot"><button class="btn outline" data-back>Voltar</button><button class="btn primary" data-act="dados-submit">Confirmar dados</button></div>
 </section>
 
+<section class="screen" id="manual-pass">
+  <div class="bar"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Dados do passaporte</div>
+  <div class="body" id="manual-body">
+    <h1>Informe os dados do seu passaporte</h1>
+    <p class="lead">Preencha exatamente como aparecem no documento.</p>
+    <div class="cell"><div class="field" id="mp-name"><label>Nome completo</label><input type="text" placeholder="Nome completo" autocomplete="off" ></div><div class="err" data-err="mp-name">Informe seu nome completo.</div></div>
+    <div class="cell"><div class="field" id="mp-num"><label>Número do passaporte</label><input type="text" placeholder="Número do passaporte" autocomplete="off" maxlength="9"></div><div class="err" data-err="mp-num">Use de 6 a 9 letras ou números.</div></div>
+    <div class="cell"><div class="field sel-f" id="mp-country"><label>País emissor</label><select required><option value="" disabled selected hidden>País emissor</option><option value="Brasil">Brasil</option><option value="Argentina">Argentina</option><option value="Chile">Chile</option><option value="Colômbia">Colômbia</option><option value="Panamá">Panamá</option><option value="Paraguai">Paraguai</option><option value="Peru">Peru</option><option value="Uruguai">Uruguai</option><option value="Portugal">Portugal</option><option value="Estados Unidos">Estados Unidos</option></select></div><div class="err" data-err="mp-country">Selecione o país emissor.</div></div>
+    <div class="two">
+      <div class="cell"><div class="field" id="mp-issued"><label>Data de emissão</label><input type="text" placeholder="dd/mm/aaaa" autocomplete="off" inputmode="numeric" maxlength="10" data-mask="date"></div><div class="err" data-err="mp-issued">Informe uma data válida.</div></div>
+      <div class="cell"><div class="field" id="mp-expires"><label>Data de validade</label><input type="text" placeholder="dd/mm/aaaa" autocomplete="off" inputmode="numeric" maxlength="10" data-mask="date"></div><div class="err" data-err="mp-expires">Informe uma data válida.</div></div>
+    </div>
+    <div class="two">
+      <div class="cell"><div class="field" id="mp-birthdate"><label>Data de nascimento</label><input type="text" placeholder="dd/mm/aaaa" autocomplete="off" inputmode="numeric" maxlength="10" data-mask="date"></div><div class="err" data-err="mp-birthdate">Informe uma data válida.</div></div>
+      <div class="cell"><div class="field sel-f" id="mp-sex"><label>Sexo</label><select required><option value="" disabled selected hidden>Sexo</option><option value="Masculino">Masculino</option><option value="Feminino">Feminino</option><option value="Outro">Outro</option></select></div><div class="err" data-err="mp-sex">Selecione uma opção.</div></div>
+    </div>
+    <div class="cell"><div class="field" id="mp-birth"><label>Naturalidade</label><input type="text" placeholder="Naturalidade" autocomplete="off" ></div><div class="err" data-err="mp-birth">Informe a naturalidade.</div></div>
+    <div class="cell"><div class="field" id="mp-p1"><label>Filiação 1</label><input type="text" placeholder="Filiação 1" autocomplete="off" ></div><div class="err" data-err="mp-p1">Informe o nome completo.</div></div>
+    <div class="cell"><div class="field" id="mp-p2"><label>Filiação 2 (opcional)</label><input type="text" placeholder="Filiação 2 (opcional)" autocomplete="off" ></div><div class="err" data-err="mp-p2"></div></div>
+    <p class="note" style="margin-bottom:8px">Depois vamos confirmar que o passaporte é seu com uma foto do seu rosto.</p>
+  </div>
+  <div class="foot"><button class="btn primary" data-act="manual-submit">Continuar</button></div>
+</section>
+
 <section class="screen" id="cam-doc" data-auto="nfc" data-delay="3200">
   <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Leitura do documento</div>
   <div class="body" style="display:flex;flex-direction:column;gap:16px">
     <h1 style="font-size:18px;line-height:24px">Posicione o documento aberto dentro da área indicada e mantenha até tirar a foto.</h1>
     <div class="cam scan"><video class="camv" playsinline muted autoplay></video><div class="frame-doc"></div><div class="cam-msg"></div></div>
   </div>
-  <div class="foot"><button class="btn soft" data-go="dados-form" data-set="tipo=dados">Informar dados manualmente</button></div>
+  <div class="foot"><button class="btn soft" data-go="manual-pass" data-set="tipo=passaporte">Informar dados manualmente</button></div>
 </section>
 
 <section class="screen" id="nfc" data-auto="load-doc" data-delay="3200">
   <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Leitura do documento</div>
   <div class="body">
     <h2 style="font-size:22px;line-height:32px">Encoste o documento do seu dispositivo para leitura por aproximação:</h2>
-    <div class="nfc"><svg viewBox="0 0 192 192"><circle cx="96" cy="96" r="94" fill="none" stroke="#111" stroke-width="4"/><circle cx="96" cy="96" r="48" fill="none" stroke="#111" stroke-width="4"/><circle cx="96" cy="96" r="13" fill="none" stroke="#111" stroke-width="4"/></svg></div>
+    <div class="nfc"><span class="wave"></span><span class="wave w2"></span><span class="wave w3"></span><svg viewBox="0 0 192 192"><circle cx="96" cy="96" r="94" fill="none" stroke="#111" stroke-width="4"/><circle cx="96" cy="96" r="48" fill="none" stroke="#111" stroke-width="4"/><circle cx="96" cy="96" r="13" fill="none" stroke="#111" stroke-width="4"/></svg></div>
     <p class="center-t" style="margin-top:36px;font-size:15px">Aproxime o documento</p>
   </div>
   <div class="foot"><button class="btn soft" style="border-color:var(--primary-dark)" data-go="load-doc">Cancelar</button></div>
@@ -835,6 +867,7 @@ p{font-size:14px;line-height:24px}
     var el=$('#'+id); el.classList.add('active');
     $('#sb').className='sb '+(/^(splash|login|login-email|signup|welcome|home)$/.test(id)?'dark':'light');
     $$('.sheet-wrap.open').forEach(function(s){s.classList.remove('open')});
+    if(id==='manual-pass'){var mn=$('#mp-name input');if(mn&&!mn.value){mn.value=U().name;$('#mp-name').classList.add('has')}}
     if(id==='idioma')syncLangToggles();
     if(id==='share'||id==='shared')renderShare();
     if(id==='rosto-intro'){var rl=$('#rosto-lead');if(rl)rl.style.display=state.tipo==='dados'?'':'none'}
@@ -883,6 +916,33 @@ p{font-size:14px;line-height:24px}
       var fv=function(id,v){var f=$('#'+id),e=$('input',f);e.value=v;f.classList.add('has','filled');f.classList.remove('bad');$('[data-err="'+id+'"]').classList.remove('on')};
       fv('dd-name',U().name);fv('dd-mail',U().email);fv('dd-phone',U().phone);
       return
+    }
+    if(act==='manual-submit'){
+      var g=function(id){var e=$('#'+id+' input')||$('#'+id+' select');return e.value.trim()};
+      var pd=function(v){var m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);if(!m)return null;var d=new Date(+m[3],+m[2]-1,+m[1]);return d.getFullYear()===+m[3]&&d.getMonth()===+m[2]-1&&d.getDate()===+m[1]?d:null};
+      var today=new Date();today.setHours(0,0,0,0);
+      var di=pd(g('mp-issued')),dv=pd(g('mp-expires')),db=pd(g('mp-birthdate'));
+      var m={ /* campo -> mensagem de erro (vazio = válido) */
+        'mp-name':(g('mp-name').split(/\s+/).length<2||g('mp-name').length<5)?'Informe seu nome completo.':'',
+        'mp-num':!/^[A-Za-z0-9]{6,9}$/.test(g('mp-num'))?'Use de 6 a 9 letras ou números.':'',
+        'mp-country':!g('mp-country')?'Selecione o país emissor.':'',
+        'mp-issued':!di?'Informe a data no formato dd/mm/aaaa.':(di>today?'A emissão não pode ser no futuro.':''),
+        'mp-expires':!dv?'Informe a data no formato dd/mm/aaaa.':(di&&dv<=di?'A validade deve ser posterior à emissão.':(dv<today?'Passaporte vencido. Use um documento válido.':'')),
+        'mp-birthdate':!db?'Informe a data no formato dd/mm/aaaa.':(db>today?'A data de nascimento não pode ser no futuro.':''),
+        'mp-sex':!g('mp-sex')?'Selecione uma opção.':'',
+        'mp-birth':g('mp-birth').length<2?'Informe a naturalidade.':'',
+        'mp-p1':g('mp-p1').split(/\s+/).length<2?'Informe o nome completo.':''
+      };
+      var anyBad=false,firstBad=null;
+      Object.keys(m).forEach(function(id){
+        var f=$('#'+id),er=$('[data-err="'+id+'"]');
+        if(m[id])er.textContent=m[id];er.classList.toggle('on',!!m[id]);f.classList.toggle('bad',!!m[id]);
+        if(m[id]){anyBad=true;if(!firstBad)firstBad=f}
+      });
+      if(anyBad){firstBad.scrollIntoView({block:'center'});toast('Revise os campos destacados');return}
+      state.pass={name:g('mp-name'),num:g('mp-num').toUpperCase(),country:g('mp-country'),issued:g('mp-issued'),birthDate:g('mp-birthdate'),expires:g('mp-expires'),sex:g('mp-sex'),birth:g('mp-birth'),p1:g('mp-p1'),p2:g('mp-p2')};
+      state.tipo='passaporte';
+      go('rosto-intro');return
     }
     if(act==='dados-submit'){
       var dv=function(id){return $('#'+id+' input').value.trim()};
@@ -967,7 +1027,8 @@ p{font-size:14px;line-height:24px}
     {n:'Cadastro',d:'Criar conta com validação de campos',id:'signup'},
     {n:'Login com Google',d:'Escolha de conta e permissões',id:'social-google'},
     {n:'Login com Apple',d:'Nome, e-mail e Face ID',id:'social-apple'},
-    {n:'Criar credencial: dados manuais',d:'Auto declaração de dados',id:'dados-form',tipo:'dados'},
+    {n:'Criar credencial: passaporte manual',d:'Formulário do passaporte',id:'manual-pass'},
+    {n:'Criar credencial: dados pessoais',d:'Auto declaração de dados',id:'dados-form',tipo:'dados'},
     {n:'Carteira vazia',d:'Início sem credenciais',id:'home'},
     {n:'Criar credencial',d:'Tipo, documento, rosto e confirmação',id:'tipo'},
     {n:'Usar credencial',d:'Carteira, detalhe e Face ID',id:'cred',w:1},
@@ -983,7 +1044,7 @@ p{font-size:14px;line-height:24px}
     var b=e.target.closest('[data-flow]');if(!b)return;
     var f=FLOWS[+b.getAttribute('data-flow')];
     state.user=null;state.dd=null;state.pass=null;state.use=null;state.passaporte=state.dados=!!f.w;state.tipo=f.tipo||'passaporte';view='passaporte';
-    stack=f.id==='splash'?['splash']:/^(login-email|signup|social-google|social-apple)$/.test(f.id)?['login',f.id]:f.id==='home'?['home']:f.id==='tipo'?['home','tipo']:f.id==='dados-form'?['home','tipo','dados-form']:f.id==='confirm'?['home','tipo','confirm']:['home',f.id];
+    stack=f.id==='splash'?['splash']:/^(login-email|signup|social-google|social-apple)$/.test(f.id)?['login',f.id]:f.id==='home'?['home']:f.id==='tipo'?['home','tipo']:f.id==='dados-form'?['home','tipo','dados-form']:f.id==='manual-pass'?['home','tipo','como','val-doc','manual-pass']:f.id==='confirm'?['home','tipo','confirm']:['home',f.id];
     closeFlows();show(f.id);
   });
   $('#restartBtn').addEventListener('click',function(){
