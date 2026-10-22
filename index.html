@@ -60,6 +60,10 @@ body{font-family:'Open Sans',system-ui,sans-serif;color:var(--text);background:#
 .flows button small{display:block;color:#9a9ba8;font-size:11px;font-weight:400;margin-top:2px}
 .flows button:hover{background:#2f303a}
 .stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+body.full .toolbar,body.full .sitefoot{display:none}
+#fsExit{position:fixed;top:10px;right:10px;z-index:60;width:40px;height:40px;border-radius:50%;background:rgba(21,22,26,.72);color:#fff;border:1px solid rgba(255,255,255,.25);display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#fsExit svg{width:22px;height:22px}
+body.full #fsExit{display:flex}
 .sitefoot{flex:none;height:36px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8b8c99;background:#15161a;border-top:1px solid #2c2d34;padding:0 16px;text-align:center}
 
 /* Moldura de iPhone */
@@ -328,8 +332,10 @@ p{font-size:14px;line-height:24px}
     <button id="vPhone" class="on"><svg><use href="#i-phone"/></svg>App</button>
     <button id="vWeb"><svg><use href="#i-monitor"/></svg>Web</button>
   </div>
+  <button class="tb" id="fsBtn" aria-label="Tela cheia" title="Tela cheia"><svg><use href="#i-expand"/></svg><span>Tela cheia</span></button>
   <button class="tb" id="restartBtn"><svg><use href="#i-refresh"/></svg><span>Reiniciar</span></button>
 </header>
+<button id="fsExit" aria-label="Sair da tela cheia" title="Sair da tela cheia" hidden><svg><use href="#i-compress"/></svg></button>
 <main class="stage" id="stage">
 <div class="device" id="device">
 <div class="notch"></div>
@@ -348,6 +354,8 @@ p{font-size:14px;line-height:24px}
   <symbol id="i-image" viewBox="0 0 24 24"><path fill="currentColor" d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.500 13.500l2.500 3 3.500-4.500 4.500 6H5z"/></symbol>
   <symbol id="i-tick" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.200 4.800 12l-1.400 1.400L9 19 21 7l-1.400-1.400z"/></symbol>
   <symbol id="i-alert" viewBox="0 0 24 24"><path fill="currentColor" d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2v-4h2z"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path fill="currentColor" d="M7 14H5v5h5v-2H7zm-2-4h2V7h3V5H5zm12 7h-3v2h5v-5h-2zM14 5v2h3v3h2V5z"/></symbol>
+  <symbol id="i-compress" viewBox="0 0 24 24"><path fill="currentColor" d="M5 16h3v3h2v-5H5zm3-8H5v2h5V5H8zm6 11h2v-3h3v-2h-5zm2-11V5h-2v5h5V8z"/></symbol>
   <symbol id="i-back"viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path fill="currentColor" d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></symbol>
   <symbol id="i-id" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 14H4V6h16zM13 9h5v1.5h-5zm0 3h5v1.5h-5zM9 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3.5 4.5c0-1.7-2.3-2.5-3.5-2.5s-3.5.8-3.5 2.5V17h7z"/></symbol>
@@ -1190,6 +1198,29 @@ p{font-size:14px;line-height:24px}
   $('#vPhone').addEventListener('click',function(){setMode('phone',true)});
   $('#vWeb').addEventListener('click',function(){setMode('web',true)});
   window.addEventListener('resize',function(){setMode(savedMode()||'phone')});
+  /* Tela cheia: usa a API nativa quando existe; senão (ex.: iPhone) esconde o cabeçalho e o rodapé */
+  var rootEl=document.documentElement, nativeFs=false;
+  var fsEl=function(){return document.fullscreenElement||document.webkitFullscreenElement||null};
+  function setFull(on){
+    body.classList.toggle('full',on);
+    $('#fsExit').hidden=!on;
+    fit();setTimeout(fit,250);
+  }
+  function enterFull(){
+    setFull(true);
+    var req=rootEl.requestFullscreen||rootEl.webkitRequestFullscreen;
+    if(req){
+      try{var r=req.call(rootEl,{navigationUI:'hide'});nativeFs=true;if(r&&r.catch)r.catch(function(){nativeFs=false})}catch(_){nativeFs=false}
+    }
+  }
+  function exitFull(){
+    nativeFs=false;
+    if(fsEl()){var ex=document.exitFullscreen||document.webkitExitFullscreen;try{var r=ex.call(document);if(r&&r.catch)r.catch(function(){})}catch(_){}}
+    setFull(false);
+  }
+  $('#fsBtn').addEventListener('click',function(){body.classList.contains('full')?exitFull():enterFull()});
+  $('#fsExit').addEventListener('click',exitFull);
+  ['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){document.addEventListener(ev,function(){if(!fsEl()&&nativeFs&&body.classList.contains('full')){nativeFs=false;setFull(false)}})});
   $('#yr').textContent=new Date().getFullYear();
   setMode(savedMode()||'phone');
 

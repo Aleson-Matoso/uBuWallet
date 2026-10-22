@@ -230,6 +230,8 @@ window.I18N=[
 ['Cartão com QR code (passe para o lado)','Card with QR code (swipe sideways)','Tarjeta con código QR (desliza hacia el lado)'],
 ['Carteira cheia','Full wallet','Billetera llena'],
 ['Passaporte, dados pessoais e credencial do evento','Passport, personal data and event credential','Pasaporte, datos personales y credencial del evento'],
+['Tela cheia','Full screen','Pantalla completa'],
+['Sair da tela cheia','Exit full screen','Salir de pantalla completa'],
 ['Credencial usada:','Credential used:','Credencial usada:'],
 ['Só são enviados os dados que existem nela.','Only the data it contains is sent.','Solo se envían los datos que contiene.'],
 ['Adicione uma credencial para compartilhar seus dados.','Add a credential to share your data.','Agrega una credencial para compartir tus datos.'],
