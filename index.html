@@ -200,6 +200,7 @@ p{font-size:14px;line-height:24px}
 /* Hero azul */
 .hero{background:var(--primary);height:100px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff}
 .hero.green{background:var(--success)}
+.hero.red{background:#66160E}
 .hero svg{width:44px;height:44px}
 .list-dot{padding-left:18px;font-size:14px}
 .list-dot li{line-height:32px}
@@ -323,6 +324,7 @@ p{font-size:14px;line-height:24px}
   <symbol id="i-person" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-2.700 0-8 1.300-8 4v2h16v-2c0-2.700-5.300-4-8-4z"/></symbol>
   <symbol id="i-image" viewBox="0 0 24 24"><path fill="currentColor" d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.500 13.500l2.500 3 3.500-4.500 4.500 6H5z"/></symbol>
   <symbol id="i-tick" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.200 4.800 12l-1.400 1.400L9 19 21 7l-1.400-1.400z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path fill="currentColor" d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2v-4h2z"/></symbol>
   <symbol id="i-back"viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path fill="currentColor" d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></symbol>
   <symbol id="i-id" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 14H4V6h16zM13 9h5v1.5h-5zm0 3h5v1.5h-5zM9 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3.5 4.5c0-1.7-2.3-2.5-3.5-2.5s-3.5.8-3.5 2.5V17h7z"/></symbol>
@@ -677,6 +679,16 @@ p{font-size:14px;line-height:24px}
   <div class="foot"><button class="btn primary" data-go="shared">Compartilhar</button></div>
 </section>
 
+<section class="screen" id="no-creds">
+  <div class="bar"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Compartilhar dados</div>
+  <div class="hero red"><svg><use href="#i-alert"/></svg></div>
+  <div class="body">
+    <h2 style="font-size:24px;margin-bottom:8px">Nenhuma credencial cadastrada</h2>
+    <p style="font-size:15px;line-height:28px">Adicione credenciais antes de compartilhar dados</p>
+  </div>
+  <div class="foot"><button class="btn primary" data-go="tipo">Adicionar credencial</button></div>
+</section>
+
 <section class="screen" id="shared">
   <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Compartilhar dados</div>
   <div class="hero green"><svg><use href="#i-check"/></svg></div>
@@ -920,7 +932,7 @@ p{font-size:14px;line-height:24px}
     if(act==='google-continue'){var ga=$('#accts .acct.sel');setUser({name:ga.getAttribute('data-name'),email:ga.getAttribute('data-email'),phone:PERSONA.phone})}
     if(act==='apple-continue'){var an=$('#social-apple input').value.trim()||PERSONA.name,am=$('#mailopts .acct.sel');setUser({name:an,email:am.getAttribute('data-email'),phone:PERSONA.phone})}
     if(act==='use-cred'){state.use=view}
-    if(act==='scan-read'){if(!usedCred()){toast('Adicione uma credencial para compartilhar seus dados.');return}go('share');return}
+    if(act==='scan-read'){if(!usedCred()){go('no-creds');return}go('share');return}
     if(act==='doc-photo'){state.pass=null;state.tipo='passaporte'}
     if(act==='fill-social'){
       var fv=function(id,v){var f=$('#'+id),e=$('input',f);e.value=v;f.classList.add('has','filled');f.classList.remove('bad');$('[data-err="'+id+'"]').classList.remove('on')};
@@ -1043,6 +1055,7 @@ p{font-size:14px;line-height:24px}
     {n:'Criar credencial',d:'Tipo, documento, rosto e confirmação',id:'tipo'},
     {n:'Usar credencial',d:'Carteira, detalhe e Face ID',id:'cred',w:1},
     {n:'Compartilhar dados',d:'QR, consentimento e confirmação',id:'scan',w:1},
+    {n:'Compartilhar sem credencial',d:'Erro de carteira vazia',id:'no-creds'},
     {n:'Opções e idioma',d:'Menu de opções, idioma e termos',id:'opcoes',w:1}
   ];
   var fm=$('#flowMenu');
