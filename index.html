@@ -840,8 +840,18 @@ p{font-size:14px;line-height:24px}
     if(k==='age')return isAdult(passData().birthDate)?'Maior de idade':'Menor de idade';
     return '';
   }
+  /* Credencial do convite: compartilha os dados do próprio convite/evento */
+  var EVENT_ITEMS=[['name','Nome e sobrenome'],['num','Número'],['type','Tipo'],['issued','Data de emissão'],['valid','Data de validade'],['obs','Obs.:']];
+  function evValue(k){var E=evData();return k==='name'?E.name:k==='num'?E.num:k==='type'?E.type:k==='issued'?E.issued:k==='valid'?E.expires:E.obs}
   function renderShare(){
     var c=usedCred(),av=SHARE_AVAIL[c]||[];
+    if(c==='evento'){
+      var rowsE=EVENT_ITEMS.map(function(it){return '<div class="srow"><span class="l">'+it[1]+'</span><span class="v">'+esc(evValue(it[0]))+'</span></div>'}).join('');
+      $('#share-list').innerHTML=rowsE;$('#shared-list').innerHTML=rowsE;
+      $('#share-used').innerHTML='<span>Credencial usada:</span> <b>UbU Conference 2026</b>';
+      $('#shared-used').innerHTML='<span>Credencial usada:</span> <b>UbU Conference 2026</b>';
+      return;
+    }
     var rows=SHARE_ITEMS.map(function(it){
       var ok=av.indexOf(it[0])>-1;
       return '<div class="srow'+(ok?'':' na')+'"><span class="l">'+it[1]+'</span><span class="v">'+(ok?esc(shareValue(it[0],c)):'Não disponível nesta credencial')+'</span></div>';
