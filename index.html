@@ -137,6 +137,20 @@ body.web .sheet{max-width:640px;margin:0 auto}
 .srow .v{text-align:right;color:#222;word-break:break-word}
 .srow.na .l,.srow.na .v{color:#8a8c99;font-weight:400}
 .srow.na .v{font-style:italic}
+/* Credenciais: páginas (detalhes e QR code) */
+.pager{display:flex;flex-direction:column}
+.pages{align-items:flex-start;transition:height .2s;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;touch-action:pan-x pan-y;cursor:grab}
+.pages.drag{scroll-behavior:auto;scroll-snap-type:none;cursor:grabbing}
+.pg{flex:0 0 100%;scroll-snap-align:center;min-width:0}
+.dots{display:flex;justify-content:center;gap:4px;margin-top:14px}
+.dots button{width:8px;height:8px;border-radius:4px;background:#b3b5cc;transition:width .2s,background .2s;padding:0}
+.dots button.on{width:24px;background:var(--primary-mid)}
+.qr-card{background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.qr-card .in{padding:20px;display:flex;align-items:center;justify-content:center}
+.qr-card .qr{width:min(100%,260px);aspect-ratio:1;display:block;image-rendering:crisp-edges}
+.cred-head.ev{background:linear-gradient(90deg,#3f4797,#5663d9)}
+.cred-head .cred-ico,.ico-circle.ev .cred-ico{width:22px;height:22px;object-fit:contain}
+.ico-circle.ev{background:#5663d9}
 .or{display:flex;align-items:center;gap:12px;margin:20px 0 16px;font-size:14px}
 .or::before,.or::after{content:"";flex:1;border-top:1px solid #6b6d7a}
 body.phone .tabbar{height:80px;padding-bottom:16px}
@@ -515,6 +529,7 @@ p{font-size:14px;line-height:24px}
     <button class="opt" data-go="como" data-set="tipo=passaporte"><span class="ico-circle"><svg><use href="#i-id"/></svg></span><span class="txt"><b>Um documento</b><small>Use seu passaporte para criar a credencial</small></span><svg class="chev"><use href="#i-chev"/></svg></button>
     <button class="opt" data-go="dados-form" data-set="tipo=dados"><span class="ico-circle"><svg><use href="#i-badge"/></svg></span><span class="txt"><b>Dados pessoais</b><small>Informe manualmente os dados que você quer compartilhar</small></span><svg class="chev"><use href="#i-chev"/></svg></button>
   </div>
+  <div class="foot"><button class="btn soft" data-go="invite-scan">Recebi um convite</button></div>
 </section>
 
 <section class="screen" id="como">
@@ -675,6 +690,24 @@ p{font-size:14px;line-height:24px}
   </div>
 </section>
 
+<section class="screen" id="invite-scan">
+  <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Convite de credencial</div>
+  <div class="body" style="display:flex;flex-direction:column;gap:16px">
+    <h1 style="font-size:18px;line-height:24px">Aponte a câmera para o código QR do convite</h1>
+    <button class="cam scan" style="width:100%" data-act="invite-read" aria-label="Simular leitura do QR"><video class="camv" playsinline muted autoplay></video><div class="cam-msg"></div><span style="position:absolute;left:0;right:0;bottom:12px;text-align:center;color:#ddd;font-size:12px;z-index:3;text-shadow:0 1px 3px #000">Toque na câmera para simular a leitura</span></button>
+  </div>
+</section>
+
+<section class="screen" id="invite-confirm">
+  <div class="bar"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Confirmação</div>
+  <div class="body">
+    <h1 style="font-size:18px;line-height:24px">Sua credencial vai ser criada com os dados de acesso ao evento</h1>
+    <p style="font-size:15px;line-height:32px;margin-bottom:12px">Você vai poder validar a sua entrada com:</p>
+    <div data-tpl="cred-event"></div>
+  </div>
+  <div class="foot"><button class="btn primary" data-act="invite-finish">Finalizar</button></div>
+</section>
+
 <section class="screen" id="share">
   <div class="bar"><button class="back" data-back><svg width="24" height="24"><use href="#i-back"/></svg></button>Compartilhar dados</div>
   <div class="hero"><svg><use href="#i-share"/></svg></div>
@@ -756,7 +789,7 @@ p{font-size:14px;line-height:24px}
 
   /* Templates de credencial */
   /* ===== Câmera do dispositivo (foto do documento, foto do rosto e leitura de QR) ===== */
-  var CAMS={'cam-doc':'environment','cam-face':'user','scan':'environment'};
+  var CAMS={'cam-doc':'environment','cam-face':'user','scan':'environment','invite-scan':'environment'};
   var camStream=null,camTimer=null;
   function stopCam(){
     clearInterval(camTimer);camTimer=null;
@@ -776,9 +809,9 @@ p{font-size:14px;line-height:24px}
       camStream=st;v.classList.toggle('mirror',mode==='user');v.srcObject=st;
       var pl=v.play&&v.play();if(pl&&pl.catch)pl.catch(function(){});
       msg.textContent='';armAuto(el);
-      if(id==='scan'&&window.BarcodeDetector){
+      if((id==='scan'||id==='invite-scan')&&window.BarcodeDetector){
         var bd=new BarcodeDetector({formats:['qr_code']});
-        camTimer=setInterval(function(){bd.detect(v).then(function(c){if(c.length&&el.classList.contains('active')){clearInterval(camTimer);$('[data-act="scan-read"]',el).click()}}).catch(function(){})},500);
+        camTimer=setInterval(function(){bd.detect(v).then(function(c){if(c.length&&el.classList.contains('active')){clearInterval(camTimer);$('[data-act$="-read"]',el).click()}}).catch(function(){})},500);
       }
     }).catch(function(){
       if(!el.classList.contains('active'))return;
@@ -788,14 +821,14 @@ p{font-size:14px;line-height:24px}
 
   /* ===== Compartilhamento: só vai o que a credencial usada realmente contém ===== */
   var SHARE_ITEMS=[['name','Nome e sobrenome'],['birth','Data de nascimento'],['valid','Data de validade'],['mail','E-mail'],['age','Conferência de maioridade']];
-  var SHARE_AVAIL={passaporte:['name','birth','valid','age'],dados:['name','valid','mail']};
+  var SHARE_AVAIL={passaporte:['name','birth','valid','age'],dados:['name','valid','mail'],evento:['name','valid']};
   function usedCred(){
     if(state.use&&state[state.use])return state.use;
-    return state.passaporte?'passaporte':state.dados?'dados':null;
+    return state.passaporte?'passaporte':state.dados?'dados':state.evento?'evento':null;
   }
   function shareValue(k,cred){
-    if(k==='name')return cred==='passaporte'?passData().name:ddData().name;
-    if(k==='valid')return cred==='passaporte'?passData().expires:ddData().expires;
+    if(k==='name')return cred==='passaporte'?passData().name:cred==='evento'?evData().name:ddData().name;
+    if(k==='valid')return cred==='passaporte'?passData().expires:cred==='evento'?evData().expires:ddData().expires;
     if(k==='mail')return ddData().email;
     if(k==='birth')return passData().birthDate;
     if(k==='age')return isAdult(passData().birthDate)?'Maior de idade':'Menor de idade';
@@ -812,14 +845,14 @@ p{font-size:14px;line-height:24px}
       return '<div class="srow"><span class="l">'+it[1]+'</span><span class="v">'+esc(shareValue(it[0],c))+'</span></div>';
     }).join('');
     $('#shared-list').innerHTML=shared;
-    var label=c==='passaporte'?'Passaporte':'Credencial de dados';
+    var label=c==='passaporte'?'Passaporte':c==='evento'?'uBu Conference 2026':'Credencial de dados';
     $('#share-used').innerHTML='<span>Credencial usada:</span> <b>'+label+'</b>. <span>Só são enviados os dados que existem nela.</span>';
     $('#shared-used').innerHTML='<span>Credencial usada:</span> <b>'+label+'</b>';
   }
   /* ===== Perfil do usuário: vem da conta usada no login e alimenta todas as telas ===== */
   var PERSONA={name:'Maria Fernanda da Silva',email:'maria.silva@gmail.com',phone:'(+507) 1243 - 5678',birth:'15/03/1990'};
   function U(){return state.user||PERSONA}
-  function setUser(u){state.user=u;state.dd=null;state.pass=null;state.passaporte=false;state.dados=false}
+  function setUser(u){state.user=u;state.dd=null;state.pass=null;state.passaporte=false;state.dados=false;state.evento=false}
   var words=function(n){return n.trim().split(/\s+/)};
   var firstName=function(n){return words(n)[0]};
   var shortName=function(n){var w=words(n);return w.length>1?w[0]+' '+w[w.length-1]:w[0]};
@@ -858,28 +891,52 @@ p{font-size:14px;line-height:24px}
     '<dl><dt>Nome</dt><dd>'+esc(D.name)+'</dd></dl>'+
     '<dl class="grid"><div><dt>Data de emissão</dt><dd>'+esc(D.issued)+'</dd></div><div><dt>Data de validade</dt><dd>'+esc(D.expires)+'</dd></div>'+
     '<div><dt>E-mail</dt><dd>'+esc(D.email)+'</dd></div><div><dt>Telefone</dt><dd>'+esc(D.phone)+'</dd></div></dl></div></div>'}
+  var EV_NUMBER='UBU-2026-0042';
+  function evData(){var t=new Date(T0.getFullYear(),T0.getMonth(),T0.getDate()+90);return {name:U().name,num:EV_NUMBER,type:'VIP Experience',issued:dmy(T0),expires:dmy(t),obs:'Todas as refeições inclusas'}}
+  function evHead(){return '<div class="cred-head ev"><img class="cred-ico" src="assets/logo-icon.png" alt="">uBu Conference 2026</div>'}
+  function credEvento(){
+    var E=evData();
+    return '<div class="cred">'+evHead()+'<div class="in">'+
+    '<dl><dt>Nome</dt><dd>'+esc(E.name)+'</dd></dl>'+
+    '<dl class="grid"><div><dt>Número</dt><dd>'+esc(E.num)+'</dd></div><div><dt>Tipo</dt><dd>'+esc(E.type)+'</dd></div>'+
+    '<div><dt>Data de emissão</dt><dd>'+esc(E.issued)+'</dd></div><div><dt>Data de validade</dt><dd>'+esc(E.expires)+'</dd></div></dl>'+
+    '<dl><dt>Obs.:</dt><dd>'+esc(E.obs)+'</dd></dl></div></div>'}
+  function credQr(kind){
+    var head=kind==='evento'?evHead():kind==='dados'?'<div class="cred-head">'+ICON('badge')+'Dados pessoais</div>':'<div class="cred-head">'+ICON('passport')+'Passaporte</div>';
+    return '<div class="qr-card">'+head+'<div class="in"><img class="qr" src="assets/qr-'+kind+'.svg" alt="QR code da credencial"></div></div>'}
+  function credPager(kind){
+    var card=kind==='evento'?credEvento():kind==='dados'?credDados():credPassaporte();
+    return '<div class="pager"><div class="pages" id="cred-pages"><div class="pg">'+card+'</div><div class="pg">'+credQr(kind)+'</div></div>'+
+      '<div class="dots" id="cred-dots"><button class="on" data-page="0" aria-label="Dados da credencial"></button><button data-page="1" aria-label="QR code da credencial"></button></div></div>'}
+  function fitPager(){var p=$('#cred-pages');if(!p)return;var i=Math.round(p.scrollLeft/(p.clientWidth+12)),pg=p.children[i];if(pg)p.style.height=pg.offsetHeight+'px'}
+  function showQr(){var p=$('#cred-pages');if(p)p.scrollTo({left:p.clientWidth+12})}
   var view='passaporte';
 
   function renderTemplates(){
     $('[data-tpl="cred-current"]').innerHTML = state.tipo==='dados'?credDados():credPassaporte();
-    $('[data-tpl="cred-view"]').innerHTML = view==='dados'?credDados():credPassaporte();
+    $('[data-tpl="cred-view"]').innerHTML = credPager(view);
+    var ce=$('[data-tpl="cred-event"]');if(ce)ce.innerHTML=credEvento();
   }
 
   function renderHome(){
     var h='<h1 style="margin-top:8px">Minha carteira</h1><p style="margin:8px 0 16px">'+
-      (state.passaporte||state.dados?'Adicione suas credenciais para compartilhar seus dados':'Adicione credenciais para compartilhar seus dados de forma segura.')+'</p>';
-    if(!state.passaporte&&!state.dados){
+      (state.passaporte||state.dados||state.evento?'Adicione suas credenciais para compartilhar seus dados':'Adicione credenciais para compartilhar seus dados de forma segura.')+'</p>';
+    if(!state.passaporte&&!state.dados&&!state.evento){
       h+='<div class="empty"><div class="row"><span class="ico-circle" style="color:#222">'+ICON('box')+'</span><div><b>Sua carteira está vazia</b><small>Adicione uma credencial para acessar.</small></div></div>'+
          '<button class="btn soft" data-go="tipo">'+ICON('plus')+'Adicionar credencial</button></div>';
     }else{
       if(state.passaporte)h+=walletCard('passaporte','Passaporte','passport');
       if(state.dados)h+=walletCard('dados','Credencial de dados','badge');
+      if(state.evento)h+=walletCard('evento','uBu Conference 2026','event');
       h+='<button class="btn soft" data-go="tipo">'+ICON('plus')+'Adicionar credencial</button>';
     }
     $('#home-body').innerHTML=h;
     $('#u-first').textContent=firstName(U().name);
   }
-  function walletCard(k,t,i){var exp=k==='passaporte'?passData().expires:ddData().expires;return '<button class="wallet-card" data-go="cred" data-view="'+k+'"><span class="ico-circle">'+ICON(i)+'</span><span class="txt"><small>'+t+'</small><strong>'+esc(shortName(U().name))+'</strong><small><span>Validade:</span> '+esc(exp)+'</small></span><svg class="chev"><use href="#i-chev"/></svg></button>'}
+  function walletCard(k,t,i){
+    var exp=k==='passaporte'?passData().expires:k==='evento'?evData().expires:ddData().expires;
+    var ic=i==='event'?'<span class="ico-circle ev"><img class="cred-ico" src="assets/logo-icon.png" alt=""></span>':'<span class="ico-circle">'+ICON(i)+'</span>';
+    return '<button class="wallet-card" data-go="cred" data-view="'+k+'">'+ic+'<span class="txt"><small>'+t+'</small><strong>'+esc(shortName(U().name))+'</strong><small><span>Validade:</span> '+esc(exp)+'</small></span><svg class="chev"><use href="#i-chev"/></svg></button>'}
 
   /* Abas inferiores */
   function renderTabs(){
@@ -902,7 +959,8 @@ p{font-size:14px;line-height:24px}
     if(id==='share'||id==='shared')renderShare();
     if(id==='rosto-intro'){var rl=$('#rosto-lead');if(rl)rl.style.display=state.tipo==='dados'?'':'none'}
     if(id==='home')renderHome();
-    if(id==='confirm'||id==='cred')renderTemplates();
+    if(id==='confirm'||id==='cred'||id==='invite-confirm')renderTemplates();
+    if(id==='cred')requestAnimationFrame(fitPager);
     var b=$('.body',el); if(b)b.scrollTop=0;
     if(CAMS[id])startCam(id,el);else armAuto(el);
   }
@@ -940,7 +998,9 @@ p{font-size:14px;line-height:24px}
     if(act==='save-lang'){var on=$('#langs .toggle.on');if(on)setLang(on.parentNode.getAttribute('data-lang'));toast('Idioma salvo');back();return}
     if(act==='google-continue'){var ga=$('#accts .acct.sel');setUser({name:ga.getAttribute('data-name'),email:ga.getAttribute('data-email'),phone:PERSONA.phone})}
     if(act==='apple-continue'){var an=$('#social-apple input').value.trim()||PERSONA.name,am=$('#mailopts .acct.sel');setUser({name:an,email:am.getAttribute('data-email'),phone:PERSONA.phone})}
-    if(act==='use-cred'){state.use=view}
+    if(act==='use-cred'){state.use=view;if(view==='evento'){$$('.sheet-wrap.open').forEach(function(sw){sw.classList.remove('open')});showQr();return}}
+    if(act==='invite-read'){go('invite-confirm');return}
+    if(act==='invite-finish'){state.evento=true;go('home',{reset:true});toast('Credencial criada e adicionada na carteira!');return}
     if(act==='scan-read'){if(!usedCred()){go('no-creds');return}go('share');return}
     if(act==='doc-photo'){state.pass=null;state.tipo='passaporte'}
     if(act==='fill-social'){
@@ -1004,7 +1064,7 @@ p{font-size:14px;line-height:24px}
       setUser({name:v('f-name').trim(),email:v('f-mail').trim(),phone:PERSONA.phone});
       go('load-wallet');return
     }
-    if(act==='reset-wallet'){state.passaporte=false;state.dados=false}
+    if(act==='reset-wallet'){state.passaporte=false;state.dados=false;state.evento=false}
     if(act==='finalizar'){state[state.tipo==='dados'?'dados':'passaporte']=true;go('home',{reset:true});toast('Credencial criada com sucesso');return}
     if(act==='revogar'){state[view]=false;if(state.use===view)state.use=null;toast('Credencial revogada');go('home',{reset:true});return}
     if(el.hasAttribute('data-lang')){$$('#langs .toggle').forEach(function(t){t.classList.remove('on')});$('.toggle',el).classList.add('on');return}
@@ -1060,6 +1120,8 @@ p{font-size:14px;line-height:24px}
     {n:'Login com Apple',d:'Nome, e-mail e Face ID',id:'social-apple'},
     {n:'Criar credencial: passaporte manual',d:'Formulário do passaporte',id:'manual-pass'},
     {n:'Criar credencial: dados pessoais',d:'Auto declaração de dados',id:'dados-form',tipo:'dados'},
+    {n:'Convite de credencial',d:'Leitura do QR do convite',id:'invite-scan'},
+    {n:'Credencial do evento',d:'Cartão com QR code (passe para o lado)',id:'cred',ev:1,v:'evento'},
     {n:'Carteira vazia',d:'Início sem credenciais',id:'home'},
     {n:'Criar credencial',d:'Tipo, documento, rosto e confirmação',id:'tipo'},
     {n:'Usar credencial',d:'Carteira, detalhe e Face ID',id:'cred',w:1},
@@ -1075,7 +1137,7 @@ p{font-size:14px;line-height:24px}
   fm.addEventListener('click',function(e){
     var b=e.target.closest('[data-flow]');if(!b)return;
     var f=FLOWS[+b.getAttribute('data-flow')];
-    state.user=null;state.dd=null;state.pass=null;state.use=null;state.passaporte=state.dados=!!f.w;state.tipo=f.tipo||'passaporte';view='passaporte';
+    state.user=null;state.dd=null;state.pass=null;state.use=null;state.passaporte=state.dados=!!f.w;state.evento=!!f.ev;state.tipo=f.tipo||'passaporte';view=f.v||'passaporte';
     stack=f.id==='splash'?['splash']:/^(login-email|signup|social-google|social-apple)$/.test(f.id)?['login',f.id]:f.id==='home'?['home']:f.id==='tipo'?['home','tipo']:f.id==='dados-form'?['home','tipo','dados-form']:f.id==='manual-pass'?['home','tipo','como','val-doc','manual-pass']:f.id==='confirm'?['home','tipo','confirm']:['home',f.id];
     closeFlows();show(f.id);
   });
@@ -1113,6 +1175,36 @@ p{font-size:14px;line-height:24px}
     f.classList.toggle('has',!!e.target.value);f.classList.remove('bad');
     var er=f.nextElementSibling;if(er&&er.classList.contains('err'))er.classList.remove('on');
   });
+  doc_pager();
+  function doc_pager(){
+    document.addEventListener('scroll',function(e){
+      var p=e.target;if(!p||p.id!=='cred-pages')return;
+      var i=Math.round(p.scrollLeft/(p.clientWidth+12));
+      $$('#cred-dots button').forEach(function(b,k){b.classList.toggle('on',k===i)});
+      fitPager();
+    },true);
+    var drag=null;
+    document.addEventListener('pointerdown',function(e){
+      var p=e.target.closest&&e.target.closest('#cred-pages');if(!p||e.pointerType!=='mouse')return;
+      drag={p:p,x:e.clientX,left:p.scrollLeft,moved:false};
+    });
+    document.addEventListener('pointermove',function(e){
+      if(!drag)return;var dx=e.clientX-drag.x;
+      if(Math.abs(dx)>4){drag.moved=true;drag.p.classList.add('drag')}
+      if(drag.moved)drag.p.scrollLeft=drag.left-dx;
+    });
+    function end(e){
+      if(!drag)return;var p=drag.p,dx=e.clientX-drag.x,w=p.clientWidth+12;
+      p.classList.remove('drag');
+      var i=Math.round(drag.left/w);if(dx<-40)i=1;else if(dx>40)i=0;
+      p.scrollTo({left:i*w});drag=null;
+    }
+    document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
+    document.addEventListener('click',function(e){
+      var b=e.target.closest&&e.target.closest('#cred-dots button');if(!b)return;
+      var p=$('#cred-pages');p.scrollTo({left:(+b.getAttribute('data-page'))*(p.clientWidth+12)});
+    });
+  }
   renderTabs();
   var start=location.hash.slice(1);
   if(start&&$('#'+start)){state.passaporte=state.dados=/^(cred|scan|share|shared|opcoes|idioma)$/.test(start);stack=['home',start];show(start)}
