@@ -1219,7 +1219,8 @@ p{font-size:14px;line-height:24px}
   $('#langBtn').addEventListener('click',function(e){e.stopPropagation();toggleMenu(langMenu,this,fm,$('#flowBtn'))});
   document.addEventListener('click',function(e){if(!e.target.closest('.menu-wrap'))closeMenus()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMenus()});
-  window.addEventListener('resize',closeMenus);
+  var lastW=window.innerWidth;
+  window.addEventListener('resize',function(){if(window.innerWidth!==lastW){lastW=window.innerWidth;closeMenus()}});   /* só fecha ao mudar a largura (girar a tela), não quando a barra do navegador esconde */
   window.addEventListener('orientationchange',closeMenus);
   fm.addEventListener('click',function(e){
     var b=e.target.closest('[data-flow]');if(!b)return;
