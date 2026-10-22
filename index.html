@@ -75,7 +75,7 @@ body.full #fsExit{display:flex}
 .app{position:relative;width:360px;height:780px;background:var(--bg);overflow:hidden;border-radius:44px;--sb:44px}
 .notch{position:absolute;top:24px;left:50%;width:104px;height:30px;margin-left:-52px;border-radius:15px;background:#000;z-index:8}
 .homebar{position:absolute;bottom:20px;left:50%;width:124px;height:5px;margin-left:-62px;border-radius:3px;background:#111;z-index:8;opacity:.85}
-.sb{position:absolute;top:14px;left:14px;width:360px;height:44px;z-index:7;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 6px 34px;font-size:14px;font-weight:700;border-radius:44px 44px 0 0;pointer-events:none}
+.sb{position:absolute;top:14px;left:14px;width:360px;height:46px;z-index:7;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 6px 34px;font-size:14px;font-weight:700;border-radius:44px 44px 0 0;pointer-events:none}
 .sb.light{background:var(--surface);color:#111}
 .sb.dark{background:var(--primary);color:#fff}
 .sb svg{width:18px;height:12px;fill:currentColor}
@@ -856,44 +856,21 @@ p{font-size:14px;line-height:24px}
     });
   }
 
-  /* ===== Compartilhamento: só vai o que a credencial usada realmente contém ===== */
-  var SHARE_ITEMS=[['name','Nome e sobrenome'],['birth','Data de nascimento'],['valid','Data de validade'],['mail','E-mail'],['age','Conferência de maioridade']];
-  var SHARE_AVAIL={passaporte:['name','birth','valid','age'],dados:['name','valid','mail'],evento:['name','valid']};
+  /* ===== Compartilhamento: envia exatamente os dados que estão na credencial usada ===== */
   function usedCred(){
     if(state.use&&state[state.use])return state.use;
     return state.passaporte?'passaporte':state.dados?'dados':state.evento?'evento':null;
   }
-  function shareValue(k,cred){
-    if(k==='name')return cred==='passaporte'?passData().name:cred==='evento'?evData().name:ddData().name;
-    if(k==='valid')return cred==='passaporte'?passData().expires:cred==='evento'?evData().expires:ddData().expires;
-    if(k==='mail')return ddData().email;
-    if(k==='birth')return passData().birthDate;
-    if(k==='age')return isAdult(passData().birthDate)?'Maior de idade':'Menor de idade';
-    return '';
+  function shareRows(c){
+    if(c==='evento'){var E=evData();return [['Nome',E.name],['Número',E.num],['Tipo',E.type],['Data de emissão',E.issued],['Data de validade',E.expires],['Obs.:',E.obs]]}
+    if(c==='passaporte'){var P=passData();return [['Nome',P.name],['Número',P.num],['País emissor',P.country],['Data de emissão',P.issued],['Data de validade',P.expires],['Data de nascimento',P.birthDate],['Sexo',P.sex],['Naturalidade',P.birth],['Filiação 1',P.p1]].concat(P.p2?[['Filiação 2',P.p2]]:[])}
+    var D=ddData();return [['Nome',D.name],['Data de emissão',D.issued],['Data de validade',D.expires],['E-mail',D.email],['Telefone',D.phone]];
   }
-  /* Credencial do convite: compartilha os dados do próprio convite/evento */
-  var EVENT_ITEMS=[['name','Nome e sobrenome'],['num','Número'],['type','Tipo'],['issued','Data de emissão'],['valid','Data de validade'],['obs','Obs.:']];
-  function evValue(k){var E=evData();return k==='name'?E.name:k==='num'?E.num:k==='type'?E.type:k==='issued'?E.issued:k==='valid'?E.expires:E.obs}
   function renderShare(){
-    var c=usedCred(),av=SHARE_AVAIL[c]||[];
-    if(c==='evento'){
-      var rowsE=EVENT_ITEMS.map(function(it){return '<div class="srow"><span class="l">'+it[1]+'</span><span class="v">'+esc(evValue(it[0]))+'</span></div>'}).join('');
-      $('#share-list').innerHTML=rowsE;$('#shared-list').innerHTML=rowsE;
-      $('#share-used').innerHTML='<span>Credencial usada:</span> <b>UbU Conference 2026</b>';
-      $('#shared-used').innerHTML='<span>Credencial usada:</span> <b>UbU Conference 2026</b>';
-      return;
-    }
-    var rows=SHARE_ITEMS.map(function(it){
-      var ok=av.indexOf(it[0])>-1;
-      return '<div class="srow'+(ok?'':' na')+'"><span class="l">'+it[1]+'</span><span class="v">'+(ok?esc(shareValue(it[0],c)):'Não disponível nesta credencial')+'</span></div>';
-    }).join('');
-    $('#share-list').innerHTML=rows;
-    var shared=SHARE_ITEMS.filter(function(it){return av.indexOf(it[0])>-1}).map(function(it){
-      return '<div class="srow"><span class="l">'+it[1]+'</span><span class="v">'+esc(shareValue(it[0],c))+'</span></div>';
-    }).join('');
-    $('#shared-list').innerHTML=shared;
+    var c=usedCred(),rows=shareRows(c).map(function(r){return '<div class="srow"><span class="l">'+r[0]+'</span><span class="v">'+esc(r[1])+'</span></div>'}).join('');
+    $('#share-list').innerHTML=rows;$('#shared-list').innerHTML=rows;
     var label=c==='passaporte'?'Passaporte':c==='evento'?'UbU Conference 2026':'Credencial de dados';
-    $('#share-used').innerHTML='<span>Credencial usada:</span> <b>'+label+'</b>. <span>Só são enviados os dados que existem nela.</span>';
+    $('#share-used').innerHTML='<span>Credencial usada:</span> <b>'+label+'</b>';
     $('#shared-used').innerHTML='<span>Credencial usada:</span> <b>'+label+'</b>';
   }
   /* ===== Perfil do usuário: vem da conta usada no login e alimenta todas as telas ===== */
@@ -1251,7 +1228,7 @@ p{font-size:14px;line-height:24px}
     var s=Math.min(1,(stage.clientHeight-24)/808,(stage.clientWidth-24)/388);
     dev.style.transform='scale('+s+')';
   }
-  $('#vPhone').addEventListener('click',function(){setMode('phone',true)});
+  $('#vPhone').addEventListener('click',function(){setMode('phone',true);if(window.innerWidth>600&&!body.classList.contains('full'))enterFull()});
   $('#vWeb').addEventListener('click',function(){setMode('web',true)});
   window.addEventListener('resize',function(){setMode(savedMode()||'phone')});
   /* Tela cheia: usa a API nativa quando existe; senão (ex.: iPhone) esconde o cabeçalho e o rodapé */
@@ -1277,6 +1254,12 @@ p{font-size:14px;line-height:24px}
   $('#fsBtn').addEventListener('click',function(){body.classList.contains('full')?exitFull():enterFull()});
   $('#fsExit').addEventListener('click',exitFull);
   ['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){document.addEventListener(ev,function(){if(!fsEl()&&nativeFs&&body.classList.contains('full')){nativeFs=false;setFull(false)}})});
+  /* ?full=1 abre já em tela cheia (o navegador só libera a tela cheia nativa depois do primeiro toque) */
+  if(/[?&]full=1/.test(location.search)){
+    setFull(true);
+    var firstTap=function(){document.removeEventListener('pointerdown',firstTap,true);var rq=rootEl.requestFullscreen||rootEl.webkitRequestFullscreen;if(rq&&!fsEl()){try{nativeFs=true;var r=rq.call(rootEl,{navigationUI:'hide'});if(r&&r.catch)r.catch(function(){nativeFs=false})}catch(_){nativeFs=false}}};
+    document.addEventListener('pointerdown',firstTap,true);
+  }
   $('#yr').textContent=new Date().getFullYear();
   setMode(savedMode()||'phone');
 
