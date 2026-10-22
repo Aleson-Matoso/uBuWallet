@@ -1130,6 +1130,7 @@ p{font-size:14px;line-height:24px}
     {n:'Criar credencial: dados pessoais',d:'Auto declaração de dados',id:'dados-form',tipo:'dados'},
     {n:'Convite de credencial',d:'Leitura do QR do convite',id:'invite-scan'},
     {n:'Credencial do evento',d:'Cartão com QR code (passe para o lado)',id:'cred',ev:1,v:'evento'},
+    {n:'Carteira cheia',d:'Passaporte, dados pessoais e credencial do evento',id:'home',w:1},
     {n:'Carteira vazia',d:'Início sem credenciais',id:'home'},
     {n:'Criar credencial',d:'Tipo, documento, rosto e confirmação',id:'tipo'},
     {n:'Usar credencial',d:'Carteira, detalhe e Face ID',id:'cred',w:1},
@@ -1145,7 +1146,7 @@ p{font-size:14px;line-height:24px}
   fm.addEventListener('click',function(e){
     var b=e.target.closest('[data-flow]');if(!b)return;
     var f=FLOWS[+b.getAttribute('data-flow')];
-    state.user=null;state.dd=null;state.pass=null;state.use=null;state.passaporte=state.dados=!!f.w;state.evento=!!f.ev;state.tipo=f.tipo||'passaporte';view=f.v||'passaporte';
+    state.user=null;state.dd=null;state.pass=null;state.use=null;state.passaporte=state.dados=!!f.w;state.evento=!!(f.w||f.ev);state.tipo=f.tipo||'passaporte';view=f.v||'passaporte';
     stack=f.id==='splash'?['splash']:/^(login-email|signup|social-google|social-apple)$/.test(f.id)?['login',f.id]:f.id==='home'?['home']:f.id==='tipo'?['home','tipo']:f.id==='dados-form'?['home','tipo','dados-form']:f.id==='manual-pass'?['home','tipo','como','val-doc','manual-pass']:f.id==='confirm'?['home','tipo','confirm']:['home',f.id];
     closeFlows();show(f.id);
   });
@@ -1215,7 +1216,7 @@ p{font-size:14px;line-height:24px}
   }
   renderTabs();
   var start=location.hash.slice(1);
-  if(start&&$('#'+start)){state.passaporte=state.dados=/^(cred|scan|share|shared|opcoes|idioma)$/.test(start);stack=['home',start];show(start)}
+  if(start&&$('#'+start)){state.passaporte=state.dados=state.evento=/^(cred|scan|share|shared|opcoes|idioma)$/.test(start);stack=['home',start];show(start)}
   else show('splash');
   var ql=/[?&]lang=(pt|en|es)/.exec(location.search);
   setLang(ql?ql[1]:'en');
