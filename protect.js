@@ -35,21 +35,32 @@
     },true);
   });
 
-  /* 4. Atalhos de inspeção, salvar, imprimir e capturar */
+  /* 4. Atalhos de teclado: bloqueia qualquer combinação com Ctrl, Cmd ou Alt e as teclas F1 a F24.
+        Dentro de campos de texto continuam liberados: digitar (inclusive acentos via Option/AltGr),
+        colar (Ctrl/Cmd+V), selecionar tudo (Ctrl/Cmd+A) e desfazer (Ctrl/Cmd+Z).
+        Teclas simples (Tab, Enter, Espaço, setas) seguem funcionando para navegação e acessibilidade. */
   var blankTimer;
   function flash(ms){cover('key',true,'Captura de tela bloqueada');clearTimeout(blankTimer);blankTimer=setTimeout(function(){cover('key',false)},ms||1800)}
+  var MODIFIERS=['control','meta','alt','altgraph','shift','capslock','os','fn','dead'];
   doc.addEventListener('keydown',function(e){
-    var k=(e.key||'').toLowerCase(), c=e.ctrlKey||e.metaKey;
-    var block=
-      e.keyCode===123||                                   /* F12 */
-      (c&&e.shiftKey&&'ijcknm'.indexOf(k)>-1)||           /* Ctrl/Cmd+Shift+I,J,C,K,N,M */
-      (e.metaKey&&e.altKey&&'iujc'.indexOf(k)>-1)||       /* Cmd+Opt+I,U,J,C */
-      (c&&'suap'.indexOf(k)>-1&&!e.shiftKey&&!e.altKey&&k!==''); /* salvar, ver código, selecionar tudo, imprimir */
-    if(k==='printscreen'||k==='snapshot'){flash(2500);return}
-    if(e.metaKey&&e.shiftKey&&'345'.indexOf(k)>-1)flash(2500);   /* Cmd+Shift+3/4/5 no macOS */
-    if(e.metaKey&&e.shiftKey&&(e.key==='#'||e.key==='$'||e.key==='%'))flash(2500);
-    if(block){e.preventDefault();e.stopPropagation();return false}
+    var k=(e.key||'').toLowerCase();
+    if(k==='printscreen'||k==='snapshot'){flash(2500);e.preventDefault();return}
+    if(e.metaKey&&e.shiftKey&&('345'.indexOf(k)>-1||e.key==='#'||e.key==='$'||e.key==='%'))flash(2500); /* Cmd+Shift+3/4/5 no macOS */
+    if(MODIFIERS.indexOf(k)>-1)return;
+    var t=e.target, inField=!!(t&&t.closest&&t.closest('input,textarea,select'));
+    var mod=e.ctrlKey||e.metaKey, alt=e.altKey;
+    var fkey=(e.keyCode>=112&&e.keyCode<=135)||/^f([1-9]|1[0-9]|2[0-4])$/.test(k);
+    var altGr=!!(e.getModifierState&&e.getModifierState('AltGraph'));
+    if(!fkey&&!mod&&!alt&&!(k==='backspace'&&!inField))return;          /* teclas simples */
+    var allowed=inField&&!fkey&&(
+      (mod&&!alt&&!e.shiftKey&&(k==='v'||k==='a'||k==='z'))||           /* colar, selecionar tudo, desfazer */
+      (altGr&&k.length===1)||                                           /* símbolos com AltGr */
+      (alt&&!mod&&k.length===1));                                       /* acentos e símbolos com Option */
+    if(!allowed){e.preventDefault();e.stopPropagation();return false}
   },true);
+  /* Zoom por Ctrl+rolagem e gesto de pinça */
+  doc.addEventListener('wheel',function(e){if(e.ctrlKey||e.metaKey)e.preventDefault()},{passive:false,capture:true});
+  ['gesturestart','gesturechange','gestureend'].forEach(function(ev){doc.addEventListener(ev,function(e){e.preventDefault()},true)});
   doc.addEventListener('keyup',function(e){
     if((e.key||'').toLowerCase()==='printscreen'){
       try{navigator.clipboard.writeText('Conteúdo protegido')}catch(_){}
