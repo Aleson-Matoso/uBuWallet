@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>uBu Wallet - Protótipo</title>
+<title>UbU Wallet - Protótipo</title>
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
@@ -31,7 +31,7 @@ img{pointer-events:none}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-/* Tokens extraídos do Figma [POC] uBu Wallet */
+/* Tokens extraídos do Figma [POC] UbU Wallet */
 :root{
   --primary:#282e62; --primary-dark:#181d3d; --primary-mid:#3b438e; --event:#5d69e1;
   --bg:#ededed; --surface:#fefefe; --text:#0f0f0f; --muted:#5b5d6b;
@@ -314,7 +314,7 @@ p{font-size:14px;line-height:24px}
 </head>
 <body class="phone">
 <header class="toolbar">
-  <div class="tt"><svg width="20" height="20" style="color:#8f95ff"><use href="#i-wallet"/></svg>uBu Wallet <span>· protótipo navegável</span></div>
+  <div class="tt"><svg width="20" height="20" style="color:#8f95ff"><use href="#i-wallet"/></svg>UbU Wallet <span>· protótipo navegável</span></div>
   <div class="menu-wrap">
     <button class="tb" id="flowBtn" aria-haspopup="true" aria-expanded="false"><svg><use href="#i-flows"/></svg><span>Fluxos</span></button>
     <div class="flows" id="flowMenu" role="menu"></div>
@@ -375,13 +375,13 @@ p{font-size:14px;line-height:24px}
 
 <!-- ========== ONBOARDING ========== -->
 <section class="screen active" id="splash" data-auto="login" data-delay="2800">
-  <img src="assets/logo.png" alt="uBu" class="splash-logo">
+  <img src="assets/logo.png" alt="UbU" class="splash-logo">
   <span style="font-size:14px">Powered by Valid</span>
   <div class="splash-load" role="progressbar" aria-label="Carregando"><i></i></div>
 </section>
 
 <section class="screen" id="login">
-  <div class="brand"><img src="assets/logo.png" alt="uBu"></div>
+  <div class="brand"><img src="assets/logo.png" alt="UbU"></div>
   <div class="body stack" style="gap:20px;padding:24px 16px">
     <div class="stack"><h1>Acesse sua carteira</h1><p>Selecione como você quer acessar</p></div>
     <div class="stack" style="gap:24px">
@@ -395,7 +395,7 @@ p{font-size:14px;line-height:24px}
 </section>
 
 <section class="screen" id="login-email">
-  <div class="brand tall"><div class="obar"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Acessar</div><img src="assets/logo.png" alt="uBu"></div>
+  <div class="brand tall"><div class="obar"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Acessar</div><img src="assets/logo.png" alt="UbU"></div>
   <div class="body" style="padding:16px">
     <h1>Acesse sua carteira</h1>
     <p>Informe o seu e-mail e senha para continuar.</p>
@@ -407,7 +407,7 @@ p{font-size:14px;line-height:24px}
 </section>
 
 <section class="screen" id="signup">
-  <div class="brand tall compact"><div class="obar" style="height:48px"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Criar conta</div><img src="assets/logo.png" alt="uBu"></div>
+  <div class="brand tall compact"><div class="obar" style="height:48px"><button class="back" data-back aria-label="Voltar"><svg width="24" height="24"><use href="#i-back"/></svg></button>Criar conta</div><img src="assets/logo.png" alt="UbU"></div>
   <div class="body" style="padding:16px">
     <h1>Crie sua conta</h1>
     <p>Preencha seus dados para criar sua carteira.</p>
@@ -431,19 +431,19 @@ p{font-size:14px;line-height:24px}
   <div class="body">
     <div class="id-badge"><svg><use href="#i-google"/></svg></div>
     <h1>Escolha uma conta</h1>
-    <p>para continuar no uBu Wallet</p>
+    <p>para continuar no UbU Wallet</p>
     <div class="group" id="accts">
       <button class="acct sel" data-act="pick-acct" data-name="Maria Fernanda da Silva" data-email="maria.silva@gmail.com"><span class="avatar" style="background:#1a73e8">M</span><span class="t"><b>Maria Fernanda da Silva</b><small>maria.silva@gmail.com</small></span><span class="radio"></span></button>
       <button class="acct" data-act="pick-acct" data-name="Maria Fernanda da Silva" data-email="maria.silva@empresa.com.br"><span class="avatar" style="background:#188038">M</span><span class="t"><b>Maria Fernanda da Silva (trabalho)</b><small>maria.silva@empresa.com.br</small></span><span class="radio"></span></button>
       <button class="acct" data-toast="Adicionar outra conta não faz parte do protótipo"><span class="avatar" style="background:#e8eaed;color:#444"><svg width="22" height="22"><use href="#i-userplus"/></svg></span><span class="t"><b>Usar outra conta</b></span></button>
     </div>
     <div class="group">
-      <div class="group-h">O uBu Wallet vai receber</div>
+      <div class="group-h">O UbU Wallet vai receber</div>
       <div class="perm"><svg><use href="#i-person"/></svg>Seu nome</div>
       <div class="perm"><svg><use href="#i-mail"/></svg>Seu endereço de e-mail</div>
       <div class="perm" style="padding-bottom:12px"><svg><use href="#i-image"/></svg>Sua foto de perfil</div>
     </div>
-    <p class="note">Antes de usar este app, você pode consultar os <button class="link" data-go="terms">termos de uso</button> do uBu Wallet. O Google não compartilha sua senha com o app.</p>
+    <p class="note">Antes de usar este app, você pode consultar os <button class="link" data-go="terms">termos de uso</button> do UbU Wallet. O Google não compartilha sua senha com o app.</p>
   </div>
   <div class="foot"><button class="btn primary" data-act="google-continue" data-go="load-wallet">Continuar</button><button class="btn outline" data-back>Cancelar</button></div>
 </section>
@@ -453,7 +453,7 @@ p{font-size:14px;line-height:24px}
   <div class="body">
     <div class="id-badge apple"><svg><use href="#i-apple"/></svg></div>
     <h1>Criar conta com a Apple</h1>
-    <p>Use sua conta Apple para criar sua carteira uBu. Não pedimos senha.</p>
+    <p>Use sua conta Apple para criar sua carteira UbU. Não pedimos senha.</p>
     <div class="group">
       <div class="group-h">Nome</div>
       <div class="field" style="margin:6px 16px 16px"><label style="display:block">Nome</label><input type="text" value="Maria Fernanda da Silva" autocomplete="off"></div>
@@ -483,7 +483,7 @@ p{font-size:14px;line-height:24px}
 </section>
 
 <section class="screen" id="welcome">
-  <div class="brand"><img src="assets/logo.png" alt="uBu"></div>
+  <div class="brand"><img src="assets/logo.png" alt="UbU"></div>
   <div class="body" style="padding:24px 16px 0">
     <h1 style="margin-bottom:16px">Boas vindas à sua carteira!</h1>
     <div class="card stack" style="gap:12px;padding:16px">
@@ -516,7 +516,7 @@ p{font-size:14px;line-height:24px}
 
 <!-- ========== HOME ========== -->
 <section class="screen" id="home">
-  <div class="brand sm"><img src="assets/logo-horizontal.png" alt="uBu" style="height:28px;width:auto;display:block"><span style="font-size:16px"><span>Olá,</span> <span id="u-first">Maria</span></span></div>
+  <div class="brand sm"><img src="assets/logo-horizontal.png" alt="UbU" style="height:28px;width:auto;display:block"><span style="font-size:16px"><span>Olá,</span> <span id="u-first">Maria</span></span></div>
   <div class="body" id="home-body"></div>
   <div class="tabbar" data-tabs="home"></div>
 </section>
@@ -750,7 +750,7 @@ p{font-size:14px;line-height:24px}
     <div class="menu">
       <button data-toast="Proteções de uso não fazem parte do protótipo"><span class="ico-circle"><svg><use href="#i-key"/></svg></span><span>Ativar proteções de uso</span><svg class="chev"><use href="#i-chev"/></svg></button>
       <button data-go="idioma"><span class="ico-circle"><svg><use href="#i-globe"/></svg></span><span>Idioma</span><svg class="chev"><use href="#i-chev"/></svg></button>
-      <button data-toast="uBu Wallet · protótipo navegável · powered by Valid"><span class="ico-circle"><svg><use href="#i-info"/></svg></span><span>Sobre</span><svg class="chev"><use href="#i-chev"/></svg></button>
+      <button data-toast="UbU Wallet · protótipo navegável · powered by Valid"><span class="ico-circle"><svg><use href="#i-info"/></svg></span><span>Sobre</span><svg class="chev"><use href="#i-chev"/></svg></button>
       <button data-go="terms"><span class="ico-circle"><svg><use href="#i-book"/></svg></span><span>Termos e condições de uso</span><svg class="chev"><use href="#i-chev"/></svg></button>
     </div>
     <div style="padding:24px 16px"><button class="btn danger" data-go="login" data-reset-stack style="border-color:#8a1c1c;color:var(--danger)"><svg><use href="#i-door"/></svg>Sair</button></div>
@@ -846,7 +846,7 @@ p{font-size:14px;line-height:24px}
       return '<div class="srow"><span class="l">'+it[1]+'</span><span class="v">'+esc(shareValue(it[0],c))+'</span></div>';
     }).join('');
     $('#shared-list').innerHTML=shared;
-    var label=c==='passaporte'?'Passaporte':c==='evento'?'uBu Conference 2026':'Credencial de dados';
+    var label=c==='passaporte'?'Passaporte':c==='evento'?'UbU Conference 2026':'Credencial de dados';
     $('#share-used').innerHTML='<span>Credencial usada:</span> <b>'+label+'</b>. <span>Só são enviados os dados que existem nela.</span>';
     $('#shared-used').innerHTML='<span>Credencial usada:</span> <b>'+label+'</b>';
   }
@@ -894,7 +894,7 @@ p{font-size:14px;line-height:24px}
     '<div><dt>E-mail</dt><dd>'+esc(D.email)+'</dd></div><div><dt>Telefone</dt><dd>'+esc(D.phone)+'</dd></div></dl></div></div>'}
   var EV_NUMBER='UBU-2026-0042';
   function evData(){var t=new Date(T0.getFullYear(),T0.getMonth(),T0.getDate()+90);return {name:U().name,num:EV_NUMBER,type:'VIP Experience',issued:dmy(T0),expires:dmy(t),obs:'Todas as refeições inclusas'}}
-  function evHead(){return '<div class="cred-head ev"><img class="cred-ico" src="assets/logo-icon.png" alt="">uBu Conference 2026</div>'}
+  function evHead(){return '<div class="cred-head ev"><img class="cred-ico" src="assets/logo-icon.png" alt="">UbU Conference 2026</div>'}
   function credEvento(){
     var E=evData();
     return '<div class="cred">'+evHead()+'<div class="in">'+
@@ -935,7 +935,7 @@ p{font-size:14px;line-height:24px}
     }else{
       if(state.passaporte)h+=walletCard('passaporte','Passaporte','passport');
       if(state.dados)h+=walletCard('dados','Credencial de dados','badge');
-      if(state.evento)h+=walletCard('evento','uBu Conference 2026','event');
+      if(state.evento)h+=walletCard('evento','UbU Conference 2026','event');
       h+='<button class="btn soft" data-go="tipo">'+ICON('plus')+'Adicionar credencial</button>';
     }
     $('#home-body').innerHTML=h;

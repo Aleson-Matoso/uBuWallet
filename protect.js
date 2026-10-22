@@ -1,4 +1,4 @@
-/* Camada de proteção do protótipo uBu Wallet.
+/* Camada de proteção do protótipo UbU Wallet.
    Dificulta cópia, captura e inspeção no navegador. Nenhuma proteção client-side
    impede foto da tela com outro aparelho nem gravação de tela pelo sistema. */
 (function(){
