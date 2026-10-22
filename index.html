@@ -54,7 +54,11 @@ body{font-family:'Open Sans',system-ui,sans-serif;color:var(--text);background:#
 .seg button svg{width:18px;height:18px}
 .seg button.on{background:#4d54a8;color:#fff}
 .menu-wrap{position:relative}
-.flows{position:absolute;right:0;top:42px;width:290px;background:#22232a;border:1px solid #3a3b44;border-radius:10px;padding:6px;display:none;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.flows{position:absolute;right:0;top:42px;width:290px;max-width:calc(100vw - 16px);max-height:calc(100vh - 70px);max-height:calc(100dvh - 70px);overflow-y:auto;overscroll-behavior:contain;background:#22232a;border:1px solid #3a3b44;border-radius:10px;padding:6px;display:none;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:80}
+.flows.langmenu{width:190px}
+.flows button.on{background:#2f303a}
+.flows.langmenu button.on::after{content:"\2713";float:right;color:#8f95ff}
+.lang-wrap{display:none}
 .flows.open{display:block}
 .flows button{display:block;width:100%;padding:10px 12px;border-radius:6px;color:#e8e8ee;font-size:13px;font-weight:600}
 .flows button small{display:block;color:#9a9ba8;font-size:11px;font-weight:400;margin-top:2px}
@@ -159,7 +163,18 @@ body.web .sheet{max-width:640px;margin:0 auto}
 .or::before,.or::after{content:"";flex:1;border-top:1px solid #6b6d7a}
 body.phone .tabbar{height:80px;padding-bottom:16px}
 body.phone .foot{padding-bottom:30px}
-@media(max-width:600px){.seg.view,.tb span,.toolbar .tt span{display:none}.toolbar{padding:0 10px;gap:8px}}
+@media(max-width:600px){
+  .seg.view,.seg.lang,.tb span,.toolbar .tt span{display:none}
+  .lang-wrap{display:block}
+  .toolbar{padding:0 10px;gap:6px}
+  .tb{padding:0 10px;gap:6px}
+  .toolbar .tt{min-width:0;overflow:hidden}
+  .menu-wrap{position:static}
+  .flows{position:fixed;left:8px;right:8px;top:58px;width:auto;max-width:none}
+  .flows.langmenu{left:auto;width:200px}
+  .flows button{padding:13px 14px;font-size:14px}
+}
+@media(max-width:430px){.toolbar .tt .nm{display:none}}
 
 .screen{position:absolute;inset:var(--sb,0px) 0 0 0;display:none;flex-direction:column;background:var(--bg)}
 .screen.active{display:flex}
@@ -318,12 +333,20 @@ p{font-size:14px;line-height:24px}
 </head>
 <body class="phone">
 <header class="toolbar">
-  <div class="tt"><svg width="20" height="20" style="color:#8f95ff"><use href="#i-wallet"/></svg>UbU Wallet <span>· protótipo navegável</span></div>
+  <div class="tt"><svg width="20" height="20" style="color:#8f95ff"><use href="#i-wallet"/></svg><b class="nm">UbU Wallet</b> <span>· protótipo navegável</span></div>
   <div class="menu-wrap">
     <button class="tb" id="flowBtn" aria-haspopup="true" aria-expanded="false"><svg><use href="#i-flows"/></svg><span>Fluxos</span></button>
     <div class="flows" id="flowMenu" role="menu"></div>
   </div>
-  <div class="seg" role="group" aria-label="Language" title="Language / Idioma / Idioma">
+  <div class="menu-wrap lang-wrap">
+    <button class="tb" id="langBtn" aria-haspopup="true" aria-expanded="false" aria-label="Idioma" title="Idioma"><svg><use href="#i-globe"/></svg><b id="langCode">EN</b></button>
+    <div class="flows langmenu" id="langMenu" role="menu">
+      <button role="menuitemradio" data-uilang="pt">Português</button>
+      <button role="menuitemradio" data-uilang="en" class="on">English</button>
+      <button role="menuitemradio" data-uilang="es">Español</button>
+    </div>
+  </div>
+  <div class="seg lang" role="group" aria-label="Language" title="Language / Idioma / Idioma">
     <button data-uilang="pt" title="Português">PT</button>
     <button data-uilang="en" title="English" class="on">EN</button>
     <button data-uilang="es" title="Español">ES</button>
@@ -1110,37 +1133,61 @@ p{font-size:14px;line-height:24px}
   var ATTR_SEL='[placeholder],[aria-label],[alt],[data-toast]', ATTRS=['placeholder','aria-label','alt','data-toast'];
   var langObs=null;
   function tr(k){var d=DICT[k];return LANG==='pt'||!d?k:(d[LANG]||k)}
+  function translateText(n){
+    var p=n.parentNode;if(!p||(p.closest&&p.closest('svg,script,style,#log')))return;
+    var cur=n.nodeValue, src=(n.__s!==undefined&&n.__c===cur)?n.__s:cur;
+    var m=/^(\s*)([\s\S]*?)(\s*)$/.exec(src);if(!m[2])return;
+    var key=m[2].replace(/\s+/g,' ');if(!DICT[key])return;
+    var out=m[1]+tr(key)+m[3];
+    n.__s=src;n.__c=out;if(cur!==out)n.nodeValue=out;
+  }
+  function translateAttrs(el){
+    ATTRS.forEach(function(a){
+      var cur=el.getAttribute(a);if(cur===null)return;
+      var sk='__s_'+a,ck='__c_'+a,src=(el[sk]!==undefined&&el[ck]===cur)?el[sk]:cur;
+      var key=src.trim().replace(/\s+/g,' ');if(!DICT[key])return;
+      var out=tr(key);el[sk]=src;el[ck]=out;if(cur!==out)el.setAttribute(a,out);
+    });
+  }
+  /* Traduz só o trecho que mudou (e não a página inteira a cada alteração) */
+  function translateNode(root){
+    if(root.nodeType===3){translateText(root);return}
+    if(root.nodeType!==1)return;
+    var tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),n;
+    while((n=tw.nextNode()))translateText(n);
+    if(root.matches&&root.matches(ATTR_SEL))translateAttrs(root);
+    var els=root.querySelectorAll(ATTR_SEL);for(var k=0;k<els.length;k++)translateAttrs(els[k]);
+  }
+  var pendingNodes=new Set(), flushRaf=0;
+  var OBS_OPTS={childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTRS};
+  function flushLang(){
+    flushRaf=0;langObs.disconnect();
+    pendingNodes.forEach(function(n){if(n.isConnected)translateNode(n)});
+    pendingNodes.clear();
+    langObs.observe(document.body,OBS_OPTS);
+  }
   function applyLang(){
     if(langObs)langObs.disconnect();
-    var tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),n,nodes=[];
-    while((n=tw.nextNode()))nodes.push(n);
-    nodes.forEach(function(n){
-      var p=n.parentNode;if(!p||(p.closest&&p.closest('svg,script,style,#log')))return;
-      var cur=n.nodeValue, src=(n.__s!==undefined&&n.__c===cur)?n.__s:cur;
-      var m=/^(\s*)([\s\S]*?)(\s*)$/.exec(src);if(!m[2])return;
-      var key=m[2].replace(/\s+/g,' ');if(!DICT[key])return;
-      var out=m[1]+tr(key)+m[3];
-      n.__s=src;n.__c=out;if(cur!==out)n.nodeValue=out;
-    });
-    $$(ATTR_SEL).forEach(function(el){
-      ATTRS.forEach(function(a){
-        var cur=el.getAttribute(a);if(cur===null)return;
-        var sk='__s_'+a,ck='__c_'+a,src=(el[sk]!==undefined&&el[ck]===cur)?el[sk]:cur;
-        var key=src.trim().replace(/\s+/g,' ');if(!DICT[key])return;
-        var out=tr(key);el[sk]=src;el[ck]=out;if(cur!==out)el.setAttribute(a,out);
-      });
-    });
+    translateNode(document.body);
     document.documentElement.lang={pt:'pt-BR',en:'en',es:'es'}[LANG];
-    if(!langObs)langObs=new MutationObserver(function(){applyLang()});
-    langObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTRS});
+    if(!langObs)langObs=new MutationObserver(function(recs){
+      for(var r=0;r<recs.length;r++){
+        var rec=recs[r];
+        if(rec.type==='childList'){for(var a=0;a<rec.addedNodes.length;a++)pendingNodes.add(rec.addedNodes[a])}
+        else pendingNodes.add(rec.target);
+      }
+      flushLang();   /* o MutationObserver já agrupa as mudanças de uma mesma tarefa */
+    });
+    langObs.observe(document.body,OBS_OPTS);
   }
   function syncLangToggles(){$$('#langs button').forEach(function(b){$('.toggle',b).classList.toggle('on',b.getAttribute('data-lang')===LANG)})}
   function setLang(l){
     LANG=l;
     $$('[data-uilang]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-uilang')===l)});
+    $('#langCode').textContent=l.toUpperCase();
     syncLangToggles();applyLang();
   }
-  $$('[data-uilang]').forEach(function(b){b.addEventListener('click',function(){setLang(b.getAttribute('data-uilang'))})});
+  $$('[data-uilang]').forEach(function(b){b.addEventListener('click',function(){setLang(b.getAttribute('data-uilang'));closeMenus()})});
 
   /* ===== Barra de ferramentas: fluxos, visualização e reinício ===== */
   var FLOWS=[
@@ -1163,9 +1210,17 @@ p{font-size:14px;line-height:24px}
   ];
   var fm=$('#flowMenu');
   fm.innerHTML=FLOWS.map(function(f,i){return '<button role="menuitem" data-flow="'+i+'">'+f.n+'<small>'+f.d+'</small></button>'}).join('');
-  function closeFlows(){fm.classList.remove('open');$('#flowBtn').setAttribute('aria-expanded','false')}
-  $('#flowBtn').addEventListener('click',function(e){e.stopPropagation();var o=fm.classList.toggle('open');this.setAttribute('aria-expanded',o)});
-  document.addEventListener('click',function(e){if(!e.target.closest('.menu-wrap'))closeFlows()});
+  var langMenu=$('#langMenu');
+  function setMenu(menu,btn,open){menu.classList.toggle('open',open);btn.setAttribute('aria-expanded',open?'true':'false')}
+  function closeMenus(){setMenu(fm,$('#flowBtn'),false);setMenu(langMenu,$('#langBtn'),false)}
+  function closeFlows(){closeMenus()}
+  function toggleMenu(menu,btn,other,otherBtn){var o=!menu.classList.contains('open');setMenu(other,otherBtn,false);setMenu(menu,btn,o);if(o){var cur=menu.querySelector('.on');if(cur&&cur.scrollIntoView)cur.scrollIntoView({block:'nearest'})}}
+  $('#flowBtn').addEventListener('click',function(e){e.stopPropagation();toggleMenu(fm,this,langMenu,$('#langBtn'))});
+  $('#langBtn').addEventListener('click',function(e){e.stopPropagation();toggleMenu(langMenu,this,fm,$('#flowBtn'))});
+  document.addEventListener('click',function(e){if(!e.target.closest('.menu-wrap'))closeMenus()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMenus()});
+  window.addEventListener('resize',closeMenus);
+  window.addEventListener('orientationchange',closeMenus);
   fm.addEventListener('click',function(e){
     var b=e.target.closest('[data-flow]');if(!b)return;
     var f=FLOWS[+b.getAttribute('data-flow')];
