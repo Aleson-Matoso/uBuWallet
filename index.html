@@ -900,6 +900,7 @@ p{font-size:14px;line-height:24px}
   }
   function go(id,opts){
     opts=opts||{};
+    if(id==='scan'&&!usedCred())id='no-creds';
     if(opts.reset||id==='welcome')stack=[];
     if(stack[stack.length-1]!==id)stack.push(id);
     show(id);
