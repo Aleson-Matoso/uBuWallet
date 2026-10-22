@@ -168,6 +168,15 @@ p{font-size:14px;line-height:24px}
 /* Splash / login */
 #splash{background:linear-gradient(#282e62,#1b1f45);align-items:center;justify-content:center;color:#fff;gap:24px}
 #splash img{width:84px}
+.splash-logo{animation:splashIn .9s ease-out both,splashBreath 2.4s ease-in-out .9s infinite}
+.splash-load{position:absolute;left:50%;bottom:22%;width:132px;height:4px;margin-left:-66px;border-radius:2px;background:rgba(255,255,255,.18);overflow:hidden}
+.splash-load i{display:block;height:100%;width:100%;border-radius:2px;background:#fff;transform-origin:left center;animation:splashFill 2.6s cubic-bezier(.45,.05,.3,1) both}
+.splash-load::after{content:"";position:absolute;top:0;bottom:0;width:40px;left:-40px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:splashShine 1.2s linear infinite}
+@keyframes splashIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+@keyframes splashBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+@keyframes splashFill{from{transform:scaleX(.04)}to{transform:scaleX(1)}}
+@keyframes splashShine{to{left:132px}}
+@media(prefers-reduced-motion:reduce){.splash-logo,.splash-load i,.splash-load::after{animation:none}}
 .brand{background:var(--primary);height:188px;flex:none;display:flex;align-items:center;justify-content:center}
 .brand img{width:78px}
 .brand.sm{height:auto;padding:24px 16px;align-items:flex-start;justify-content:flex-start;flex-direction:column;gap:8px;color:#fff}
@@ -340,9 +349,10 @@ p{font-size:14px;line-height:24px}
 </svg>
 
 <!-- ========== ONBOARDING ========== -->
-<section class="screen active" id="splash" data-auto="login" data-delay="1800">
-  <img src="assets/logo.png" alt="uBu">
+<section class="screen active" id="splash" data-auto="login" data-delay="2800">
+  <img src="assets/logo.png" alt="uBu" class="splash-logo">
   <span style="font-size:14px">Powered by Valid</span>
+  <div class="splash-load" role="progressbar" aria-label="Carregando"><i></i></div>
 </section>
 
 <section class="screen" id="login">
