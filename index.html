@@ -9,6 +9,12 @@
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#282e62">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="UbU Wallet">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="application-name" content="UbU Wallet">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate">
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <meta name="referrer" content="no-referrer">
@@ -67,6 +73,8 @@ body{font-family:'Open Sans',system-ui,sans-serif;color:var(--text);background:#
 body.full .toolbar,body.full .sitefoot{display:none}
 #fsExit{position:fixed;top:10px;right:10px;z-index:60;width:40px;height:40px;border-radius:50%;background:rgba(21,22,26,.72);color:#fff;border:1px solid rgba(255,255,255,.25);display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #fsExit svg{width:22px;height:22px}
+/* App instalado (PWA): respeita a área do indicador de início do iPhone */
+@media (display-mode:standalone),(display-mode:fullscreen){body{padding-bottom:env(safe-area-inset-bottom)}}
 body.full #fsExit{display:flex}
 .sitefoot{flex:none;height:36px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8b8c99;background:#15161a;border-top:1px solid #2c2d34;padding:0 16px;text-align:center}
 
@@ -1256,6 +1264,12 @@ p{font-size:14px;line-height:24px}
     setFull(true);
     var firstTap=function(){document.removeEventListener('pointerdown',firstTap,true);var rq=rootEl.requestFullscreen||rootEl.webkitRequestFullscreen;if(rq&&!fsEl()){try{nativeFs=true;var r=rq.call(rootEl,{navigationUI:'hide'});if(r&&r.catch)r.catch(function(){nativeFs=false})}catch(_){nativeFs=false}}};
     document.addEventListener('pointerdown',firstTap,true);
+  }
+  /* App instalado (PWA): abre direto em tela cheia, sem o cabeçalho do protótipo */
+  var isApp=(window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches))||navigator.standalone===true;
+  if(isApp){body.classList.add('pwa');setFull(true)}
+  if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+    window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
   }
   $('#yr').textContent=new Date().getFullYear();
   setMode(savedMode()||'phone');
